@@ -9,13 +9,11 @@
 
 ![OpenELD — route map, HOS dashboard, and daily log sheets in one place](image.png)
 
----
 
 The US trucking industry runs on HOS compliance. Every commercial driver must track their hours, plan their stops, and submit daily log sheets — or face fines, violations, and pulled operating authority. The tools that do this cost $150–200 per truck per month, lock you into hardware contracts, and still make drivers fill out paperwork.
 
 OpenELD is the free alternative. Self-host it in minutes. No subscriptions, no hardware dongles, no per-seat pricing. Just give it a route and it tells you exactly when to drive, when to stop, and hands you FMCSA-ready log sheets.
 
----
 
 ## What it does
 
@@ -29,7 +27,6 @@ OpenELD is the free alternative. Self-host it in minutes. No subscriptions, no h
 
 **No paid API keys required.** Routing uses OSRM. Geocoding uses Nominatim. Deploy it and it works.
 
----
 
 ## Quick Start
 
@@ -42,7 +39,6 @@ docker compose up
 
 Open [http://localhost:8000](http://localhost:8000).
 
----
 
 ## Local Development
 
@@ -67,13 +63,11 @@ npm start
 
 React runs at `http://localhost:3000`, API at `http://127.0.0.1:8000/api`.
 
----
 
 ## Deploy to Render
 
 Push to GitHub → [render.com](https://render.com) → **New → Blueprint** → select this repo. Render provisions the web service and Postgres automatically.
 
----
 
 ## HOS Engine
 
@@ -88,7 +82,6 @@ OpenELD's planner is in `backend/hos_calculator/`. It models a full driving shif
 
 > OpenELD is a planning tool, not a certified ELD device. It does not implement split sleeper berth, adverse conditions exemptions, or short-haul exceptions. Always verify compliance with your ELD provider.
 
----
 
 ## API
 
@@ -112,7 +105,6 @@ OpenELD's planner is in `backend/hos_calculator/`. It models a full driving shif
 }
 ```
 
----
 
 ## Tech Stack
 
@@ -126,7 +118,6 @@ OpenELD's planner is in `backend/hos_calculator/`. It models a full driving shif
 | Serving | Gunicorn + WhiteNoise |
 | Deployment | Docker, Render Blueprint |
 
----
 
 ## Contributing
 
@@ -137,13 +128,11 @@ python backend/manage.py check
 cd frontend && npm run build
 ```
 
----
 
 ## License
 
 Apache 2.0 — see [LICENSE](LICENSE).
 
----
 
 <p align="center">
   <b>If OpenELD saves your fleet money, give it a star. That's how more drivers find it.</b><br><br>
