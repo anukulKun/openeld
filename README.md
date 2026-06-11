@@ -1,89 +1,97 @@
-# RouteGuard ELD Trip Planner
+# OpenELD
 
-RouteGuard is a full-stack ELD trip planner for commercial drivers and dispatch teams. It combines a Django REST API with a React operations dashboard to plan multi-stop trips, calculate hours-of-service constraints, and generate driver-ready daily log sheets.
+**The open-source ELD for everyone who's tired of paying $200/month to Samsara.**
 
-![RouteGuard running on Render](image.png)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/anukulKun/OpenELD)](https://github.com/anukulKun/OpenELD/commits/main)
+[![Stars](https://img.shields.io/github/stars/anukulKun/OpenELD?style=social)](https://github.com/anukulKun/OpenELD/stargazers)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?logo=discord&logoColor=white)](https://discord.gg/YOUR_INVITE)
 
-## Features
+![OpenELD — route map, HOS dashboard, and daily log sheets in one place](image.png)
 
-- Plan routes from current location to pickup and dropoff
-- Calculate FMCSA-style HOS windows, drive limits, breaks, and cycle usage
-- Generate route summaries with distance, driving hours, stop timelines, and compliance warnings
-- Render daily log sheets for multi-day trips
-- Track recent plans locally in the dashboard history
-- Display route geometry and stop context with Leaflet maps
-- Support dark and light dashboard themes
 
-## Tech Stack
+The US trucking industry runs on HOS compliance. Every commercial driver must track their hours, plan their stops, and submit daily log sheets — or face fines, violations, and pulled operating authority. The tools that do this cost $150–200 per truck per month, lock you into hardware contracts, and still make drivers fill out paperwork.
 
-- Backend: Django, Django REST Framework, django-cors-headers
-- Frontend: React, Axios, Leaflet, React Leaflet
-- Planning: custom HOS calculator, route planning helpers, and geocoding utilities
-- Data store: SQLite for local development
+OpenELD is the free alternative. Self-host it in minutes. No subscriptions, no hardware dongles, no per-seat pricing. Just give it a route and it tells you exactly when to drive, when to stop, and hands you FMCSA-ready log sheets.
 
-## Project Structure
 
-```text
-backend/
-  api/                 Trip planning API, serializers, models, and validation
-  eld_trip_planner/    Django project settings and URL routing
-  hos_calculator/      HOS rules, trip planning, and log generation
-  route_calculator/    Route distance and OSRM integration helpers
-frontend/
-  public/              React app shell
-  src/                 Dashboard views, route map, log sheets, and API client
+## What it does
+
+**Trip planning.** Give it a current location, pickup, and dropoff. OpenELD plots the route, calculates every required stop — fuel every 1,000 miles, mandatory 30-minute breaks, 10-hour sleeper resets — and tells you exactly when you arrive and how much cycle you have left.
+
+**HOS enforcement.** The planning engine runs against your selected ruleset (70/8, 60/7, or Alaska variants) and flags violations before you leave the yard — shift drive limit exceeded, duty window blown, cycle running low. Warnings before the weigh station, not after.
+
+**Daily log sheets.** Generates FMCSA-format daily logs for every day of the trip as printable SVG. Download the full trip plan as JSON or print individual sheets directly from the dashboard.
+
+**Live tracking.** Browser GPS feeds a live marker with heading, speed HUD, and next-stop distance. The driver console shows remaining drive time, duty window, and cycle in real time.
+
+**No paid API keys required.** Routing uses OSRM. Geocoding uses Nominatim. Deploy it and it works.
+
+
+## Quick Start
+
+```bash
+git clone https://github.com/anukulKun/OpenELD.git
+cd OpenELD
+cp .env.example .env
+docker compose up
 ```
 
-## Local Setup
+Open [http://localhost:8000](http://localhost:8000).
 
-Create a Python environment and install backend dependencies.
 
-```powershell
+## Local Development
+
+**Backend** (Python 3.12, Django 4.1)
+
+```bash
 cd backend
 python -m venv venv
-.\venv\Scripts\activate
+source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
 ```
 
-Install and run the frontend in another terminal.
+**Frontend** (Node 20, React 18)
 
-```powershell
+```bash
 cd frontend
 npm install
 npm start
 ```
 
-The React app runs at `http://localhost:3000` and calls the API at `http://127.0.0.1:8000/api` by default.
+React runs at `http://localhost:3000`, API at `http://127.0.0.1:8000/api`.
 
-## Environment
 
-Copy `.env.example` to `.env` for local values.
+## Deploy to Render
 
-```powershell
-Copy-Item .env.example .env
-```
+Push to GitHub → [render.com](https://render.com) → **New → Blueprint** → select this repo. Render provisions the web service and Postgres automatically.
 
-Supported variables:
 
-- `DJANGO_SECRET_KEY`: Django signing key for the backend
-- `DJANGO_DEBUG`: `True` for local development, `False` for deployed environments
-- `DJANGO_ALLOWED_HOSTS`: comma-separated hostnames allowed by Django
-- `REACT_APP_API_URL`: API base URL used by the React frontend
+## HOS Engine
 
-Keep `.env`, local SQLite databases, virtual environments, build output, admin helper scripts, and walkthrough recordings out of source control.
+OpenELD's planner is in `backend/hos_calculator/`. It models a full driving shift — drive limits, duty windows, break requirements, fuel stops, cycle exhaustion, and 34-hour restarts — and splits everything into per-day FMCSA log data.
 
-## API Overview
+| Ruleset | Cycle | Days | Drive Limit | Duty Window |
+|---------|-------|------|-------------|-------------|
+| 70-hour/8-day | 70h | 8 | 11h | 14h |
+| 60-hour/7-day | 60h | 7 | 11h | 14h |
+| Alaska 70-hour/7-day | 70h | 7 | 15h | 20h |
+| Alaska 80-hour/8-day | 80h | 8 | 15h | 20h |
 
-Primary API endpoints are exposed under `/api/trips/`.
+> OpenELD is a planning tool, not a certified ELD device. It does not implement split sleeper berth, adverse conditions exemptions, or short-haul exceptions. Always verify compliance with your ELD provider.
 
-- `POST /api/trips/plan/`: create a calculated route plan with daily logs
-- `GET /api/trips/`: list stored trip plans
-- `GET /api/trips/recent/`: return the latest saved trips
-- `GET /api/trips/{id}/logs/`: return generated daily logs for a trip
 
-Example planning payload:
+## API
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/trips/plan/` | Calculate full route + HOS plan |
+| `GET` | `/api/trips/` | List stored trips |
+| `GET` | `/api/trips/recent/` | Latest 5 trips |
+| `GET` | `/api/trips/{id}/logs/` | Daily logs for a trip |
+| `GET` | `/healthz/` | Health check |
 
 ```json
 {
@@ -97,29 +105,30 @@ Example planning payload:
 }
 ```
 
-## Verification
 
-Useful checks before committing or deploying:
+## Tech Stack
 
-```powershell
-.\.venv\Scripts\python.exe backend\manage.py check
-cd frontend
-npm.cmd run build
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 18, Leaflet, Axios |
+| Backend | Django 4.1, Django REST Framework |
+| Database | SQLite (local) / Postgres (production) |
+| Routing | OSRM, haversine fallback |
+| Geocoding | OpenStreetMap Nominatim |
+| Serving | Gunicorn + WhiteNoise |
+| Deployment | Docker, Render Blueprint |
+
+
+## Contributing
+
+PRs welcome. Open an [issue](https://github.com/anukulKun/OpenELD/issues) or join [Discord](https://discord.gg/YOUR_INVITE) to discuss before building something large.
+
+```bash
+python backend/manage.py check
+cd frontend && npm run build
 ```
 
-The frontend currently has no test files, so `npm.cmd test -- --watchAll=false` exits with React's `No tests found` message.
 
-## Deploying Publicly
+## License
 
-This repo includes a `Dockerfile` and `render.yaml` for deploying the full app as one Render web service. The Docker build compiles the React frontend, serves it through Django, runs migrations on startup, and uses Render Postgres through `DATABASE_URL`.
-
-1. Push this repository to GitHub.
-2. In Render, choose **New > Blueprint** and select the repository.
-3. Confirm the `render.yaml` blueprint. Render will create:
-   - `routeguard-eld`: the public web service
-   - `routeguard-eld-db`: the Postgres database
-4. After deploy, open the public `onrender.com` URL Render assigns to the web service.
-
-Note: the current Render free tier can spin the service down after inactivity. The first request after a quiet period may take 50 seconds or more while the app starts again.
-
-For local development, keep using the separate backend and frontend commands above.
+Apache 2.0 — see [LICENSE](LICENSE).
