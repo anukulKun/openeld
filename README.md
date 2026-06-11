@@ -132,9 +132,3 @@ cd frontend && npm run build
 ## License
 
 Apache 2.0 — see [LICENSE](LICENSE).
-
-
-<p align="center">
-  <b>If OpenELD saves your fleet money, give it a star. That's how more drivers find it.</b><br><br>
-  <a href="https://github.com/anukulKun/OpenELD/stargazers">⭐ Star OpenELD</a>
-</p>
