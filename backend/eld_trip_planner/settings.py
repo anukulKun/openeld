@@ -60,7 +60,7 @@ ROOT_URLCONF = 'eld_trip_planner.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'frontend_build'],
+        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'app_build'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'eld_trip_planner.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': config('SQLITE_DATABASE_PATH', default=str(BASE_DIR / 'db.sqlite3')),
     }
 }
 
@@ -120,8 +120,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-FRONTEND_STATIC_DIR = BASE_DIR / 'frontend_build' / 'static'
-STATICFILES_DIRS = [FRONTEND_STATIC_DIR] if FRONTEND_STATIC_DIR.exists() else []
+APP_STATIC_DIR = BASE_DIR / 'app_build' / 'static'
+APP_BUILD_DIR = BASE_DIR / 'app_build'
+STATICFILES_DIRS = [APP_BUILD_DIR] if APP_BUILD_DIR.exists() else []
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
