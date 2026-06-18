@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: backend/.env
+        required: false
+    environment:
+      SQLITE_DATABASE_PATH: "/app/backend/data/db.sqlite3"
+    volumes:
+      - openeld_data:/app/backend/data
+
+  app:
+    image: node:20-bookworm-slim
+    working_dir: /app
+    command: sh -c "npm install --legacy-peer-deps && npm start"
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: "http://127.0.0.1:8000/api"
+      HOST: "0.0.0.0"
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./app:/app
+    depends_on:
+      - backend
+
+volumes:
+  openeld_data:
