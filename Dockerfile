@@ -1,14 +1,12 @@
-FROM node:20-bookworm-slim AS frontend
+FROM node:20-bookworm-slim AS app
 
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
+WORKDIR /app/app
+COPY app/package*.json ./
 RUN npm install --legacy-peer-deps
-COPY frontend/ ./
-ARG REACT_APP_API_URL=/api
-ENV REACT_APP_API_URL=$REACT_APP_API_URL
+COPY app/ ./
 RUN npm run build
 
-FROM python:3.12-slim AS app
+FROM python:3.12-slim AS backend
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -23,7 +21,7 @@ COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ ./
-COPY --from=frontend /app/frontend/build ./frontend_build
+COPY --from=app /app/app/build ./app_build
 
 RUN python manage.py collectstatic --noinput
 
