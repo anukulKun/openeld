@@ -1,66 +1,68 @@
 # Contributing to OpenELD
 
-Thanks for your interest. OpenELD is an open-source project and contributions are welcome — bug fixes, new features, documentation, and anything that makes it more useful for drivers and fleets.
+Thanks for your interest. OpenELD is an open-source project and contributions are welcome: bug fixes, features, documentation, and anything that makes it more useful for drivers and fleets.
 
-## Before you start
+## Before You Start
 
-Check the [open issues](https://github.com/anukulKun/openeld/issues) before starting work. If you want to build something that isn't already tracked, open an issue first so we can discuss the approach. This avoids wasted effort on PRs that won't merge.
+Check the [open issues](https://github.com/anukulKun/OpenELD/issues) before starting work. If you want to build something that is not already tracked, open an issue first so we can discuss the approach.
 
 ## Setup
 
-**Backend**
+Backend, one command:
 
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver
+backend-dev.bat
 ```
 
-**Frontend**
+Then, in a second terminal, the product app:
 
 ```bash
-cd frontend
+cd app
 npm install
 npm start
 ```
 
-## Before opening a PR
-
-Run these and make sure they pass:
+If you want to run the backend manually:
 
 ```bash
-# Backend
-python backend/manage.py check
-
-# Frontend
-cd frontend && npm run build
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env
+python manage.py migrate
+python manage.py runserver
 ```
 
-## What we're looking for
+## Before Opening a PR
 
-Good contributions include:
+Run these checks and make sure they pass:
 
-- Bug fixes with a clear description of what was wrong and how you fixed it
-- HOS engine improvements — especially the known limitations tracked in [#3](https://github.com/anukulKun/openeld/issues/3)
-- Frontend fixes — the good first issue is [#2](https://github.com/anukulKun/openeld/issues/2)
-- Better geocoding or routing fallbacks
-- Documentation improvements
+```bash
+python backend/manage.py check
+cd app && npm run build
+```
 
-## What we won't merge
+## Good Contributions
 
-- Hardware ELD device integrations
-- Features that require paid third-party APIs
-- Changes that break the self-hosted, zero-API-key setup
+- Bug fixes with a clear description of what was wrong and how you fixed it.
+- HOS engine improvements, especially known limitations tracked in issues.
+- Product app fixes that improve planning, log review, or driver workflows.
+- Better geocoding or routing fallbacks.
+- Documentation improvements.
 
-## Pull request guidelines
+## Out of Scope
 
-- Keep PRs focused — one fix or feature per PR
-- Write a clear description of what changed and why
-- Reference the issue number if one exists (`Closes #2`)
-- Don't bump version numbers in your PR
+- Hardware ELD device integrations.
+- Features that require paid third-party APIs.
+- Changes that break the self-hosted, zero-paid-key setup.
+
+## Pull Request Guidelines
+
+- Keep PRs focused on one fix or feature.
+- Write a clear description of what changed and why.
+- Reference the issue number if one exists, for example `Closes #2`.
+- Do not bump version numbers in your PR.
 
 ## Questions
 
