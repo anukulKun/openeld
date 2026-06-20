@@ -22,12 +22,21 @@ ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS', default='localhost,127.0.0.1', ca
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+FLY_APP_NAME = os.environ.get('FLY_APP_NAME')
+if FLY_APP_NAME:
+    ALLOWED_HOSTS.append(f'{FLY_APP_NAME}.fly.dev')
 
 CSRF_TRUSTED_ORIGINS = config('DJANGO_CSRF_TRUSTED_ORIGINS', default='', cast=Csv())
 if RENDER_EXTERNAL_HOSTNAME:
     render_origin = f'https://{RENDER_EXTERNAL_HOSTNAME}'
     if render_origin not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(render_origin)
+if FLY_APP_NAME:
+    fly_origin = f'https://{FLY_APP_NAME}.fly.dev'
+    if fly_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(fly_origin)
+    if f'https://platform.openeld.vercel.app' not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append('https://platform.openeld.vercel.app')
 
 
 # Application definition
