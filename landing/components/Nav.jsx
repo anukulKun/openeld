@@ -12,11 +12,7 @@ const LINKS = [
 ];
 
 const GITHUB_URL = 'https://github.com/anukulKun/OpenELD';
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || (
-  typeof window !== 'undefined' && window.location.hostname === 'localhost'
-    ? 'http://localhost:3000'
-    : 'https://platform.openeld.vercel.app'
-);
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || '/';
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);

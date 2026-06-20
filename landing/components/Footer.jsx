@@ -8,7 +8,7 @@ const COLUMNS = [
     links: [
       { label: 'Features', href: '#product' },
       { label: 'Miles AI', href: '#miles' },
-      { label: 'Live demo', href: process.env.NEXT_PUBLIC_APP_URL || 'https://platform.openeld.vercel.app' },
+      { label: 'Live demo', href: process.env.NEXT_PUBLIC_APP_URL || '/' },
     ],
   },
   {
