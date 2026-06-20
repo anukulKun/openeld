@@ -56,7 +56,7 @@ npm start
 ## Repo structure
 
 | Folder | What |
-|---|---|---|
+|---|---|
 | [`landing/`](landing) | Public website (Next.js) |
 | [`app/`](app) | Product dashboard — trip planner UI (React) |
 | [`backend/`](backend) | API server — Django REST API, HOS engine, routing |
