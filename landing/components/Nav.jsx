@@ -33,14 +33,8 @@ export default function Nav() {
       <nav className={scrolled ? 'scrolled' : ''}>
         <div className="nav-inner container">
           <a href="#" className="nav-logo">
-            <svg className="nav-logo-mark" viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" rx="8" fill="var(--ink)" />
-              <path
-                d="M9 20.5L13 11.5H16L13.5 17.5H19L14 23.5L15.5 19H11.5L9 20.5Z"
-                fill="var(--accent)"
-              />
-            </svg>
-            OpenELD
+            <img src="/logo-light.png" alt="OpenELD" className="logo-light" />
+            <img src="/logo-dark.png" alt="OpenELD" className="logo-dark" />
           </a>
 
           <ul className="nav-links">
@@ -120,11 +114,13 @@ export default function Nav() {
           letter-spacing: -0.2px;
           color: var(--ink);
         }
-        .nav-logo-mark {
-          width: 28px;
-          height: 28px;
-          flex-shrink: 0;
+        .nav-logo img {
+          width: 100px;
+          height: auto;
+          display: block;
         }
+        [data-theme='light'] .logo-dark { display: none; }
+        [data-theme='dark'] .logo-light { display: none; }
         .nav-links {
           display: flex;
           align-items: center;

@@ -36,11 +36,8 @@ export default function Footer() {
         <div className="footer-top">
           <div>
             <div className="footer-brand-row">
-              <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-                <rect width="32" height="32" rx="8" fill="var(--ink)" />
-                <path d="M9 20.5L13 11.5H16L13.5 17.5H19L14 23.5L15.5 19H11.5L9 20.5Z" fill="var(--accent)" />
-              </svg>
-              OpenELD
+              <img src="/logo-light.png" alt="OpenELD" className="logo-light" />
+              <img src="/logo-dark.png" alt="OpenELD" className="logo-dark" />
             </div>
             <p className="footer-tagline">
               The open-source ELD trip planner. Free forever. Built for the drivers,
@@ -91,7 +88,10 @@ export default function Footer() {
           row-gap: 40px;
           padding-bottom: 40px;
         }
-        .footer-brand-row { display: flex; align-items: center; gap: 9px; font-size: 17px; font-weight: 600; color: var(--ink); margin-bottom: 14px; }
+        .footer-brand-row { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
+        .footer-brand-row img { width: 100px; height: auto; display: block; }
+        [data-theme='light'] .logo-dark { display: none; }
+        [data-theme='dark'] .logo-light { display: none; }
         .footer-tagline { font-size: 14px; color: var(--body); max-width: 250px; line-height: 1.6; }
         .footer-col h4 { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 18px; }
         .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
