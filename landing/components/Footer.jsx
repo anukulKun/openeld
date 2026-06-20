@@ -8,7 +8,7 @@ const COLUMNS = [
     links: [
       { label: 'Features', href: '#product' },
       { label: 'Miles AI', href: '#miles' },
-      { label: 'Live demo', href: 'https://openeld.onrender.com' },
+      { label: 'Live demo', href: '/app' },
     ],
   },
   {

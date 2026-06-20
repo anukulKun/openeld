@@ -12,7 +12,7 @@ const LINKS = [
 ];
 
 const GITHUB_URL = 'https://github.com/anukulKun/OpenELD';
-const APP_URL = 'https://openeld.onrender.com';
+const APP_URL = '/app';
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
