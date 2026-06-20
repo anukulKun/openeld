@@ -19,7 +19,7 @@ const HISTORY_LIMIT = 12;
 function App() {
   migrateLegacyStorage();
   const [currentPage, setCurrentPage] = useState('planner');
-  const [theme, setTheme] = useState(() => localStorage.getItem('rg-theme') || 'dark');
+  const [theme, setTheme] = useState(() => localStorage.getItem('openeld-theme') || 'dark');
   const [plannerTab, setPlannerTab] = useState('overview');
   const [formData, setFormData] = useState({
     driver_name: 'John Doe',
@@ -76,10 +76,9 @@ function App() {
       .catch(() => setError('Signed in, but saved trips could not be loaded. Local trips are still available.'));
   }, [user]);
 
-  // FIX UI-5: persist the visual theme on the document root so CSS variables can flip the whole app.
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('rg-theme', theme);
+    localStorage.setItem('openeld-theme', theme);
   }, [theme]);
 
   const handleFormChange = (event) => {
@@ -161,8 +160,8 @@ function App() {
       <header className="top-nav">
         <div className="nav-brand">
           <button className="hamburger" type="button" onClick={() => setSidebarOpen((open) => !open)} aria-label="Toggle sidebar">Menu</button>
-          <div className="nav-logo-badge">OE</div>
-          <span className="nav-title">Open<span className="nav-accent">ELD</span></span>
+          <img src="/logo-light.png" alt="OpenELD" className="nav-logo-light" />
+          <img src="/logo-dark.png" alt="OpenELD" className="nav-logo-dark" />
         </div>
         <nav className="nav-links" aria-label="Primary views">
           {[
