@@ -1,6 +1,6 @@
 #!/bin/bash
-# Run this in PythonAnywhere Bash console to deploy OpenELD backend
-# Usage: bash setup_pythonanywhere.sh
+# Run this from your home directory (~) in PythonAnywhere Bash console
+# Usage: cd ~ && bash openeld/backend/setup_pythonanywhere.sh
 
 set -e
 
@@ -8,11 +8,10 @@ REPO_URL="https://github.com/anukulKun/openeld.git"
 PA_USERNAME="anukulKun"
 APP_NAME="openeld"
 
-echo "=== Cloning repo ==="
-cd ~
-rm -rf $APP_NAME || true
-git clone $REPO_URL
-cd $APP_NAME/backend
+echo "=== Pulling latest code ==="
+cd ~/$APP_NAME
+git pull
+cd backend
 
 echo "=== Creating virtualenv ==="
 python3 -m venv venv
