@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Button from './Button';
 import ThemeToggle from './ThemeToggle';
+import { useTheme } from './ThemeProvider';
 
 const LINKS = [
   { href: '#product', label: 'Product' },
@@ -17,6 +18,8 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || '/';
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { theme } = useTheme();
+  const logoSrc = theme === 'dark' ? '/logo-dark.png' : '/logo-light.png';
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -29,8 +32,7 @@ export default function Nav() {
       <nav className={scrolled ? 'scrolled' : ''}>
         <div className="nav-inner container">
           <a href="#" className="nav-logo">
-            <img src="/logo-light.png" alt="OpenELD" className="logo-light" />
-            <img src="/logo-dark.png" alt="OpenELD" className="logo-dark" />
+            <img src={logoSrc} alt="OpenELD" className="nav-logo-mark" />
           </a>
 
           <ul className="nav-links">
@@ -115,8 +117,7 @@ export default function Nav() {
           height: auto;
           display: block;
         }
-        [data-theme='light'] .logo-dark { display: none; }
-        [data-theme='dark'] .logo-light { display: none; }
+        .nav-logo-mark { width: 100px; height: auto; display: block; }
         .nav-links {
           display: flex;
           align-items: center;

@@ -15,7 +15,7 @@ const plannerTabs = [
   ['logs', 'Daily Logs'],
 ];
 
-function MainPages({ page, plannerTab, onPlannerTabChange, formData, liveFormData, onFormChange, onSubmit, fieldErrors, tripPlan, history, selectedHistoryId, onHistorySelect, loading, onUseDeparture, onPlanNew, onPageChange }) {
+function MainPages({ page, plannerTab, onPlannerTabChange, formData, liveFormData, onFormChange, onSubmit, fieldErrors, tripPlan, history, selectedHistoryId, onHistorySelect, loading, onUseDeparture, onPlanNew, onPageChange, logoSrc }) {
   if (page === 'dashboard') return <DriverConsole tripPlan={tripPlan} formData={formData} />;
   if (page === 'history') return <HistoryPage history={history} selectedHistoryId={selectedHistoryId} onHistorySelect={onHistorySelect} />;
   return (
@@ -32,15 +32,18 @@ function MainPages({ page, plannerTab, onPlannerTabChange, formData, liveFormDat
       onUseDeparture={onUseDeparture}
       onPlanNew={onPlanNew}
       onPageChange={onPageChange}
+      logoSrc={logoSrc}
     />
   );
 }
 
-function TripPlanner({ tripPlan, formData, liveFormData, onFormChange, onSubmit, fieldErrors, activeTab, onTabChange, loading, onUseDeparture, onPlanNew, onPageChange }) {
+function TripPlanner({ tripPlan, formData, liveFormData, onFormChange, onSubmit, fieldErrors, activeTab, onTabChange, loading, onUseDeparture, onPlanNew, onPageChange, logoSrc }) {
   if (!tripPlan) {
     return !loading && (
       <section className="empty-state rich-empty mobile-planner-state">
-        <div className="mobile-form-brand">OpenELD</div>
+        <div className="mobile-form-brand">
+          <img src={logoSrc} alt="OpenELD" className="mobile-logo-mark" />
+        </div>
         <div className="empty-icon" aria-hidden="true" />
         <h1>Plan your compliant route</h1>
         <p>Enter your trip details to generate an FMCSA-compliant route plan with daily log sheets.</p>

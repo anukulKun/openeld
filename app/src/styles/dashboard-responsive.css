@@ -157,7 +157,7 @@
   .nav-links { display: none; }
   .hamburger { display: none; }
   .nav-title { font-size: 18px; letter-spacing: 0; }
-  .nav-logo-badge { width: 36px; height: 36px; }
+  .nav-logo-mark { width: 88px; }
   .auth-button { display: none; }
   .theme-toggle { min-height: 44px; padding: 7px 10px; }
   .app-shell { height: calc(100vh - 56px); padding-bottom: 76px; }
@@ -245,7 +245,8 @@
   .field-label { font-size: 12px; }
   .btn-primary, .btn-secondary, .download-data, .sidebar-tab, .history-trip, .history-log, .log-day-list button { min-height: 48px; font-size: 16px; }
   .mobile-planner-state { margin: 0; min-height: 100%; align-content: start; padding: 20px 16px; }
-  .mobile-form-brand { display: block; font-size: 26px; font-weight: 800; color: var(--text-primary); }
+  .mobile-form-brand { display: flex; align-items: center; justify-content: center; }
+  .mobile-logo-mark { width: 140px; height: auto; display: block; }
   .mobile-full-form { width: 100%; display: block; }
   .load-recent-link, .plan-new-link { width: 100%; margin-top: 10px; }
   .empty-icon { display: none; }
@@ -274,7 +275,7 @@
 
 @media print {
   @page { size: letter; margin: 0.5in; }
-  * { color-adjust: exact; print-color-adjust: exact; }
+  * { print-color-adjust: exact; }
   .top-nav, .sidebar, .panel-tabs, .log-day-list, .canvas-toolbar, .stats-grid, .stat-grid, .route-map, .overview-grid, .stops-grid, .hos-content-grid, .history-grid, .loading-panel, .error-banner { display: none !important; }
   .app-shell, .workspace, .page-stack, .daily-log-layout { display: block !important; min-height: auto; height: auto; overflow: visible; }
   .canvas-card { display: none; border: 0; }

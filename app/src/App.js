@@ -20,6 +20,7 @@ function App() {
   migrateLegacyStorage();
   const [currentPage, setCurrentPage] = useState('planner');
   const [theme, setTheme] = useState(() => localStorage.getItem('openeld-theme') || 'dark');
+  const logoSrc = theme === 'dark' ? '/logo-dark.png' : '/logo-light.png';
   const [plannerTab, setPlannerTab] = useState('overview');
   const [formData, setFormData] = useState({
     driver_name: 'John Doe',
@@ -160,8 +161,7 @@ function App() {
       <header className="top-nav">
         <div className="nav-brand">
           <button className="hamburger" type="button" onClick={() => setSidebarOpen((open) => !open)} aria-label="Toggle sidebar">Menu</button>
-          <img src="/logo-light.png" alt="OpenELD" className="nav-logo-light" />
-          <img src="/logo-dark.png" alt="OpenELD" className="nav-logo-dark" />
+          <img src={logoSrc} alt="OpenELD" className="nav-logo-mark" />
         </div>
         <nav className="nav-links" aria-label="Primary views">
           {[
@@ -221,6 +221,7 @@ function App() {
               setSidebarOpen(true);
             }}
             onPageChange={setCurrentPage}
+            logoSrc={logoSrc}
           />
         </main>
       </div>

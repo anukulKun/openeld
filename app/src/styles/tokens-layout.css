@@ -72,19 +72,8 @@ button { color: inherit; }
   box-shadow: var(--shadow-sm);
 }
 .nav-brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.nav-logo-badge {
-  width: 32px;
-  height: 32px;
-  background: var(--accent);
-  color: #000;
-  font-weight: 800;
-  font-size: 13px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  letter-spacing: 0.02em;
-}
+.nav-brand img { display: block; height: auto; }
+.nav-logo-mark { width: 96px; }
 .nav-title { font-size: 15px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.04em; white-space: nowrap; }
 .nav-accent { color: var(--accent); }
 .nav-subtitle { color: var(--text-muted); font-weight: 400; }

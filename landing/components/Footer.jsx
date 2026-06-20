@@ -1,5 +1,7 @@
 'use client';
 
+import { useTheme } from './ThemeProvider';
+
 const GITHUB_URL = 'https://github.com/anukulKun/OpenELD';
 
 const COLUMNS = [
@@ -30,14 +32,16 @@ const COLUMNS = [
 ];
 
 export default function Footer() {
+  const { theme } = useTheme();
+  const logoSrc = theme === 'dark' ? '/logo-dark.png' : '/logo-light.png';
+
   return (
     <footer>
       <div className="footer-panel container">
         <div className="footer-top">
           <div>
             <div className="footer-brand-row">
-              <img src="/logo-light.png" alt="OpenELD" className="logo-light" />
-              <img src="/logo-dark.png" alt="OpenELD" className="logo-dark" />
+              <img src={logoSrc} alt="OpenELD" className="footer-logo-mark" />
             </div>
             <p className="footer-tagline">
               The open-source ELD trip planner. Free forever. Built for the drivers,
@@ -89,9 +93,7 @@ export default function Footer() {
           padding-bottom: 40px;
         }
         .footer-brand-row { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
-        .footer-brand-row img { width: 100px; height: auto; display: block; }
-        [data-theme='light'] .logo-dark { display: none; }
-        [data-theme='dark'] .logo-light { display: none; }
+        .footer-logo-mark { width: 100px; height: auto; display: block; }
         .footer-tagline { font-size: 14px; color: var(--body); max-width: 250px; line-height: 1.6; }
         .footer-col h4 { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 18px; }
         .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
