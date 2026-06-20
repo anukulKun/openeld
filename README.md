@@ -12,18 +12,6 @@ OpenELD is the free, self-hosted alternative. No subscriptions. No hardware dong
 
 ---
 
-## Demo
-
-| Property | URL |
-|---|---|
-| **Landing page** | [openeld.com](https://openeld.com) |
-| **Live app** | [openeld.onrender.com](https://openeld.onrender.com) |
-| **API health** | [openeld.onrender.com/healthz/](https://openeld.onrender.com/healthz/) |
-
-> **Note:** The free Render backend may take 30–60 seconds to wake from cold start.
-
----
-
 ## What it does
 
 - **Trip planning** — Enter current location, pickup, and dropoff. OpenELD plots the route and calculates every required stop.
@@ -76,34 +64,6 @@ npm start
 
 ---
 
-## Deployment
-
-### Frontend — Vercel (free)
-
-The landing page is a Next.js static site. Deploy in one command:
-
-```bash
-cd landing
-npx vercel --prod
-```
-
-### Backend — Render (free)
-
-The Django API (including the built React dashboard) deploys via Render Blueprint. Push to GitHub, open [render.com](https://render.com), choose **New Blueprint**, and select this repo. Render provisions the web service and Postgres database from `render.yaml`.
-
-Or deploy manually:
-
-```bash
-# Build the React app
-cd app && npm install --legacy-peer-deps && npm run build
-
-# Build the Docker image
-docker build -t openeld .
-docker run -p 8000:8000 openeld
-```
-
----
-
 ## API
 
 | Method | Endpoint | Description |
@@ -125,17 +85,6 @@ Example request:
   "current_cycle_hours": 14
 }
 ```
-
----
-
-## HOS rulesets
-
-| Ruleset | Cycle | Drive Limit | Duty Window |
-|---|---|---|---|
-| 70-hour/8-day | 70h | 11h | 14h |
-| 60-hour/7-day | 60h | 11h | 14h |
-| Alaska 70-hour/7-day | 70h | 15h | 20h |
-| Alaska 80-hour/8-day | 80h | 15h | 20h |
 
 ---
 
