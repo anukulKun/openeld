@@ -57,7 +57,7 @@ npm start
 
 | Folder | What |
 |---|---|---|
-| [`landing/`](landing) | Marketing site — public website (Next.js) |
+| [`landing/`](landing) | Public website (Next.js) |
 | [`app/`](app) | Product dashboard — trip planner UI (React) |
 | [`backend/`](backend) | API server — Django REST API, HOS engine, routing |
 | [`.github/`](.github) | CI workflows, issue templates |
