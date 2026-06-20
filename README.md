@@ -68,26 +68,28 @@ npm start
 ## Repo structure
 
 | Folder | What |
-|---|---|
-| [`landing/`](landing) | Marketing site (Next.js) — deployable to Vercel |
-| [`app/`](app) | Product app — trip planner, HOS calculator, log sheets (React) |
-| [`backend/`](backend) | Django REST API — HOS rules, routing, auth |
+|---|---|---|
+| [`landing/`](landing) | Frontend — marketing site (Next.js) |
+| [`app/`](app) | UI — trip planner dashboard (React) |
+| [`backend/`](backend) | Backend — Django REST API, HOS engine, routing |
 | [`.github/`](.github) | CI workflows, issue templates |
 
 ---
 
 ## Deployment
 
-### Landing page → Vercel (free)
+### Frontend — Vercel (free)
+
+The landing page is a Next.js static site. Deploy in one command:
 
 ```bash
 cd landing
 npx vercel --prod
 ```
 
-### Backend + Product app → Render (free)
+### Backend — Render (free)
 
-Push to GitHub, open [render.com](https://render.com), choose **New Blueprint**, and select this repo. Render provisions the web service and Postgres database from `render.yaml`.
+The Django API (including the built React dashboard) deploys via Render Blueprint. Push to GitHub, open [render.com](https://render.com), choose **New Blueprint**, and select this repo. Render provisions the web service and Postgres database from `render.yaml`.
 
 Or deploy manually:
 
