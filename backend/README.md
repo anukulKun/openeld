@@ -31,6 +31,15 @@ python manage.py runserver
 
 </details>
 
+## Deployment on PythonAnywhere (free, no credit card)
+
+```bash
+# In PythonAnywhere Bash console:
+bash setup_pythonanywhere.sh
+```
+
+Then follow the manual steps printed at the end (Web tab → configure WSGI, static files, virtualenv).
+
 ## Important Folders
 
 - `api/` - REST endpoints, serializers, models, and trip planning orchestration.
