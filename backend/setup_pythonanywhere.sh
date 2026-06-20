@@ -5,7 +5,7 @@
 set -e
 
 REPO_URL="https://github.com/anukulKun/openeld.git"
-PA_USERNAME="$(whoami)"
+PA_USERNAME="anukulKun"
 APP_NAME="openeld"
 
 echo "=== Cloning repo ==="
