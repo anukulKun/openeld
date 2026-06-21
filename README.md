@@ -55,9 +55,10 @@ npm start
 
 ## Repo structure
 
+> The OpenELD marketing site lives in a separate repo: [openeld-frontend](https://github.com/anukulKun/openeld-frontend).
+
 | Folder | What |
 |---|---|
-| [`landing/`](landing) | Public website (Next.js) |
 | [`app/`](app) | Product dashboard — trip planner UI (React) |
 | [`backend/`](backend) | API server — Django REST API, HOS engine, routing |
 | [`.github/`](.github) | CI workflows, issue templates |
@@ -108,7 +109,6 @@ PRs welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Before opening a PR:
 ```bash
 python backend/manage.py check
 cd app && npm run build
-cd landing && npm run build
 ```
 
 ---

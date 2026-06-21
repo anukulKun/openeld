@@ -15,7 +15,7 @@ Fixes # (issue)
 
 - [ ] `python manage.py check`
 - [ ] `npm run build` (app)
-- [ ] `npm run build` (landing)
+
 
 ## Checklist:
 

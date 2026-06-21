@@ -9,9 +9,7 @@ __pycache__/
 node_modules/
 app/build/
 app/node_modules/
-landing/.next/
-landing/out/
-landing/node_modules/
+
 
 # Build artifacts
 .next/
