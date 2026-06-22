@@ -2,6 +2,7 @@
 backend/venv/
 backend/.venv/
 backend/db.sqlite3
+backend/firebase-service-account.json
 __pycache__/
 *.pyc
 
@@ -22,6 +23,7 @@ dist/
 .env.local
 *.env.local
 backend/.env
+app/.env
 
 # OS
 .DS_Store

@@ -12,11 +12,13 @@ class DailyLogBuilderMixin:
             schedule = self._fill_off_duty(split_by_date[day])
             driving_hours = self._sum_status(schedule, "DRIVING")
             on_not_driving = self._sum_status(schedule, "ON_DUTY_NOT_DRIVING")
-            on_duty = driving_hours + on_not_driving
-            off_duty = self._sum_status(schedule, "OFF_DUTY")
+            ym_hours = self._sum_status(schedule, "YM")
+            on_duty = driving_hours + on_not_driving + ym_hours
+            pc_hours = self._sum_status(schedule, "PC")
+            off_duty = self._sum_status(schedule, "OFF_DUTY") + pc_hours
             sleeper = self._sum_status(schedule, "SLEEPER_BERTH")
             cumulative_cycle += on_duty
-            logs.append(self._daily_log(index, day, schedule, driving_hours, on_not_driving, on_duty, off_duty, sleeper, cumulative_cycle))
+            logs.append(self._daily_log(index, day, schedule, driving_hours, on_not_driving, on_duty, off_duty, sleeper, cumulative_cycle, pc_hours, ym_hours))
         return logs
 
     def _split_segments_by_date(self, start_dt, raw_segments):
@@ -47,7 +49,7 @@ class DailyLogBuilderMixin:
             split_by_date[start_dt.date().isoformat()] = []
         return split_by_date
 
-    def _daily_log(self, index, day, schedule, driving_hours, on_not_driving, on_duty, off_duty, sleeper, cumulative_cycle):
+    def _daily_log(self, index, day, schedule, driving_hours, on_not_driving, on_duty, off_duty, sleeper, cumulative_cycle, pc_hours=0, ym_hours=0):
         total_mileage = self._end_odometer(schedule)
         return {
             "day": index,
@@ -69,7 +71,7 @@ class DailyLogBuilderMixin:
             "total_mileage": total_mileage,
             "daily_miles": self._driving_miles(schedule),
             "total_hours": round(sum(seg["end_hour"] - seg["start_hour"] for seg in schedule), 2),
-            "totals": self._totals(off_duty, sleeper, driving_hours, on_not_driving),
+            "totals": self._totals(off_duty, sleeper, driving_hours, on_not_driving, pc_hours, ym_hours),
             "events": self._log_events(day, schedule),
             "shift_drive_breakdown": self._shift_drive_breakdown(schedule),
             "shift_start": self._first_shift_value(schedule, "shift_start"),
@@ -123,12 +125,14 @@ class DailyLogBuilderMixin:
                 merged.append(segment)
         return merged
 
-    def _totals(self, off_duty, sleeper, driving_hours, on_not_driving):
+    def _totals(self, off_duty, sleeper, driving_hours, on_not_driving, pc_hours=0, ym_hours=0):
         return {
             "off_duty": round(off_duty, 2),
             "sleeper": round(sleeper, 2),
             "driving": round(driving_hours, 2),
-            "on_duty": round(on_not_driving, 2),
+            "on_duty": round(on_not_driving + ym_hours, 2),
+            "pc": round(pc_hours, 2),
+            "ym": round(ym_hours, 2),
         }
 
     def _recap(self, on_duty, cumulative_cycle):
@@ -154,7 +158,7 @@ class DailyLogBuilderMixin:
         return round(max(values) if values else 0, 1)
 
     def _log_events(self, day, schedule):
-        status_map = {"OFF_DUTY": "off_duty", "SLEEPER_BERTH": "sleeper", "DRIVING": "driving", "ON_DUTY_NOT_DRIVING": "on_duty"}
+        status_map = {"OFF_DUTY": "off_duty", "SLEEPER_BERTH": "sleeper", "DRIVING": "driving", "ON_DUTY_NOT_DRIVING": "on_duty", "PC": "pc", "YM": "ym"}
         return [{**self._log_row(day, segment), "status": status_map.get(segment["status"], "off_duty")} for segment in schedule]
 
     def _log_remarks(self, schedule):
@@ -192,6 +196,8 @@ class DailyLogBuilderMixin:
             "SLEEPER_BERTH": "Sleeper berth",
             "DRIVING": "Driving",
             "ON_DUTY_NOT_DRIVING": "On duty not driving",
+            "PC": "Personal Conveyance",
+            "YM": "Yard Move",
         }.get(status, status)
 
     def _shift_drive_breakdown(self, schedule):
@@ -214,12 +220,12 @@ class DailyLogBuilderMixin:
 
     def _first_location(self, schedule):
         for segment in schedule:
-            if segment["status"] != "OFF_DUTY" or segment["location"] != "Off duty":
+            if segment["status"] not in ("OFF_DUTY", "PC") or segment["location"] not in ("Off duty", "Personal Conveyance"):
                 return segment["location"]
         return "Off duty"
 
     def _last_location(self, schedule):
         for segment in reversed(schedule):
-            if segment["status"] != "OFF_DUTY" or segment["location"] != "Off duty":
+            if segment["status"] not in ("OFF_DUTY", "PC") or segment["location"] not in ("Off duty", "Personal Conveyance"):
                 return segment["location"]
         return "Off duty"

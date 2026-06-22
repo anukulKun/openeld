@@ -148,8 +148,18 @@ from eld_trip_planner.cors import CORS_ALLOWED_ORIGINS, CORS_ALLOW_CREDENTIALS
 CORS_ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS
 CORS_ALLOW_CREDENTIALS = CORS_ALLOW_CREDENTIALS
 
+# Firebase Admin SDK — use env vars (not a JSON file path)
+FIREBASE_PROJECT_ID = config('FIREBASE_PROJECT_ID', default='')
+FIREBASE_PRIVATE_KEY = config('FIREBASE_PRIVATE_KEY', default='')
+FIREBASE_CLIENT_EMAIL = config('FIREBASE_CLIENT_EMAIL', default='')
+# Legacy path-based config (fallback if env vars are not set)
+FIREBASE_SERVICE_ACCOUNT_PATH = config('FIREBASE_SERVICE_ACCOUNT_PATH', default='')
+
 # REST Framework Configuration
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'api.firebase_auth.FirebaseAuthentication',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }

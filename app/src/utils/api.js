@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { supabase } from '../lib/supabase';
-import { riskScore } from './tripPresentation';
+import { auth } from '../firebase';
 
 const API_BASE_URL =
   process.env.REACT_APP_API_URL ||
@@ -13,6 +12,15 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+apiClient.interceptors.request.use(async (config) => {
+  const user = auth?.currentUser;
+  if (user) {
+    const token = await user.getIdToken();
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 export const planTrip = async (tripData) => {
@@ -31,48 +39,6 @@ export const planTrip = async (tripData) => {
     console.error('Error planning trip:', error);
     throw error;
   }
-};
-
-export const saveTripToSupabase = async (tripPlan, user) => {
-  if (!supabase || !user || !tripPlan) return null;
-  const risk = riskScore(tripPlan);
-  const { data, error } = await supabase.from('trips').insert({
-    user_id: user.id,
-    route_title: tripPlan.trip_title,
-    origin: tripPlan.start_location,
-    pickup: tripPlan.pickup_location,
-    destination: tripPlan.dropoff_location,
-    start_time: tripPlan.start_time,
-    hos_rules: tripPlan.hos_rules,
-    total_miles: tripPlan.total_distance_miles,
-    drive_hours: tripPlan.total_driving_hours,
-    risk_level: risk.label,
-    plan_payload: tripPlan,
-  }).select().single();
-  if (error) throw error;
-  return data;
-};
-
-export const fetchSupabaseTrips = async (user, limit = 12) => {
-  if (!supabase || !user) return [];
-  const { data, error } = await supabase
-    .from('trips')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return (data || []).map((row) => ({
-    ...(row.plan_payload || {}),
-    trip_id: row.id,
-    created_at: row.created_at,
-    trip_title: row.route_title,
-    start_location: row.origin,
-    pickup_location: row.pickup,
-    dropoff_location: row.destination,
-    total_distance_miles: row.total_miles,
-    total_driving_hours: row.drive_hours,
-  }));
 };
 
 export const getTrips = async () => {

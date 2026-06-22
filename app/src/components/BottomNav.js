@@ -3,10 +3,10 @@ import React from 'react';
 const items = [
   ['planner', 'Plan Trip', 'Plan'],
   ['dashboard', 'My Hours', 'Time'],
-  ['history', 'Logs', 'Logs'],
+  ['history', 'Log History', 'Log'],
 ];
 
-function BottomNav({ currentPage, onPageChange, onAuthClick, user }) {
+function BottomNav({ currentPage, onPageChange }) {
   return (
     <nav className="bottom-nav" aria-label="Mobile primary views">
       {items.map(([id, label, icon]) => (
@@ -15,10 +15,6 @@ function BottomNav({ currentPage, onPageChange, onAuthClick, user }) {
           <b>{label}</b>
         </button>
       ))}
-      <button className="bottom-nav-item auth" type="button" onClick={onAuthClick}>
-        <span>{user ? 'Out' : 'In'}</span>
-        <b>{user ? 'Sign Out' : 'Sign In'}</b>
-      </button>
     </nav>
   );
 }

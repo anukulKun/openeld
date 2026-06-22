@@ -7,4 +7,4 @@ gunicorn==22.0.0
 dj-database-url==2.2.0
 psycopg2-binary==2.9.9
 whitenoise==6.7.0
-supabase==2.15.2
+firebase-admin==6.3.0
