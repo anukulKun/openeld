@@ -6,7 +6,7 @@ import StopsTimeline from './StopsTimeline';
 import DailyLogs from './DailyLogs';
 import DriverConsole from './DriverConsole';
 import HistoryPage from './HistoryPage';
-import PlannerView from './PlannerView';
+import TripEmptyState from './TripEmptyState';
 import { formatDateTime, formatHours, riskScore, sumLogs } from '../utils/tripPresentation';
 
 const plannerTabs = [
@@ -15,9 +15,9 @@ const plannerTabs = [
   ['logs', 'Daily Logs'],
 ];
 
-function MainPages({ page, plannerTab, onPlannerTabChange, formData, liveFormData, onFormChange, onSubmit, fieldErrors, tripPlan, history, selectedHistoryId, onHistorySelect, loading, onUseDeparture, onPlanNew, onPageChange, logoSrc }) {
+function MainPages({ page, plannerTab, onPlannerTabChange, formData, liveFormData, onFormChange, onSubmit, fieldErrors, tripPlan, history, selectedHistoryId, onHistorySelect, loading, optimizerData, optimizerLoading, onUseDeparture, onUseOptimizerTime, onPlanNew, onPageChange, logoSrc, onDeleteTrip }) {
   if (page === 'dashboard') return <DriverConsole tripPlan={tripPlan} formData={formData} />;
-  if (page === 'history') return <HistoryPage history={history} selectedHistoryId={selectedHistoryId} onHistorySelect={onHistorySelect} />;
+  if (page === 'history') return <HistoryPage history={history} selectedHistoryId={selectedHistoryId} onHistorySelect={onHistorySelect} onDeleteTrip={onDeleteTrip} />;
   return (
     <TripPlanner
       tripPlan={tripPlan}
@@ -29,7 +29,10 @@ function MainPages({ page, plannerTab, onPlannerTabChange, formData, liveFormDat
       activeTab={plannerTab}
       onTabChange={onPlannerTabChange}
       loading={loading}
+      optimizerData={optimizerData}
+      optimizerLoading={optimizerLoading}
       onUseDeparture={onUseDeparture}
+      onUseOptimizerTime={onUseOptimizerTime}
       onPlanNew={onPlanNew}
       onPageChange={onPageChange}
       logoSrc={logoSrc}
@@ -37,22 +40,9 @@ function MainPages({ page, plannerTab, onPlannerTabChange, formData, liveFormDat
   );
 }
 
-function TripPlanner({ tripPlan, formData, liveFormData, onFormChange, onSubmit, fieldErrors, activeTab, onTabChange, loading, onUseDeparture, onPlanNew, onPageChange, logoSrc }) {
+function TripPlanner({ tripPlan, formData, liveFormData, onFormChange, onSubmit, fieldErrors, activeTab, onTabChange, loading, optimizerData, optimizerLoading, onUseDeparture, onUseOptimizerTime, onPlanNew, onPageChange, logoSrc }) {
   if (!tripPlan) {
-    return !loading && (
-      <section className="empty-state rich-empty mobile-planner-state">
-        <div className="mobile-form-brand">
-          <img src={logoSrc} alt="OpenELD" className="mobile-logo-mark" />
-        </div>
-        <div className="empty-icon" aria-hidden="true" />
-        <h1>Plan your compliant route</h1>
-        <p>Enter your trip details to generate an FMCSA-compliant route plan with daily log sheets.</p>
-        <div className="mobile-full-form">
-          <PlannerView formData={liveFormData || formData} loading={loading} onFormChange={onFormChange} onSubmit={onSubmit} fieldErrors={fieldErrors} compactAction />
-          <button className="load-recent-link" type="button" onClick={() => onPageChange('history')}>Load Recent Trip</button>
-        </div>
-      </section>
-    );
+    return !loading && <TripEmptyState />;
   }
 
   return (
@@ -67,6 +57,13 @@ function TripPlanner({ tripPlan, formData, liveFormData, onFormChange, onSubmit,
         ))}
       </div>
       <SummaryStats tripPlan={tripPlan} formData={formData} />
+      <RiskBanner tripPlan={tripPlan} />
+      <OptimizerPanel
+        optimizerData={optimizerData}
+        optimizerLoading={optimizerLoading}
+        onUseTime={onUseOptimizerTime}
+        formStartTime={formData?.start_time || liveFormData?.start_time}
+      />
       {activeTab === 'overview' && <RouteOverview tripPlan={tripPlan} formData={formData} onUseDeparture={onUseDeparture} />}
       {activeTab === 'stops' && <StopsTimeline tripPlan={tripPlan} />}
       {activeTab === 'logs' && <DailyLogs tripPlan={tripPlan} formData={formData} />}
@@ -92,6 +89,133 @@ function ActiveTripSummary({ tripPlan, onPageChange, onPlanNew, onTabChange }) {
       </div>
       <button className="plan-new-link" type="button" onClick={onPlanNew}>Plan New Trip</button>
     </section>
+  );
+}
+
+function RiskBanner({ tripPlan }) {
+  const risk = tripPlan.violation_risk || (tripPlan.compliance_status === 'VIOLATION' ? 'CRITICAL' : '');
+  const detail = tripPlan.violation_detail || '';
+  if (!risk) return null;
+  const config = {
+    LOW: { className: 'risk-green', icon: '\u2713', label: 'Low Risk' },
+    MEDIUM: { className: 'risk-yellow', icon: '\u26A0', label: 'Medium Risk' },
+    HIGH: { className: 'risk-yellow', icon: '\u26A0', label: 'High Risk' },
+    CRITICAL: { className: 'risk-red', icon: '\u2717', label: 'Critical \u2014 Violation Unavoidable' },
+  };
+  const cfg = config[risk] || config.CRITICAL;
+  return (
+    <div className={`risk-banner ${cfg.className}`}>
+      <strong>{cfg.icon} {cfg.label}</strong>
+      {detail && <p>{detail}</p>}
+    </div>
+  );
+}
+
+function OptimizerPanel({ optimizerData, optimizerLoading, onUseTime, formStartTime }) {
+  if (optimizerLoading) {
+    return (
+      <div className="optimizer-section">
+        <div className="optimizer-header"><span>Departure Optimizer</span></div>
+        <div className="optimizer-skeleton">
+          {[1,2,3,4,5].map((i) => <div key={i} className="skeleton-row" />)}
+        </div>
+      </div>
+    );
+  }
+
+  if (!optimizerData || !optimizerData.windows || optimizerData.windows.length === 0) return null;
+
+  const windows = optimizerData.windows;
+  const config = {
+    LOW: { cls: 'risk-pill-green', label: 'Low' },
+    MEDIUM: { cls: 'risk-pill-yellow', label: 'Medium' },
+    HIGH: { cls: 'risk-pill-orange', label: 'High' },
+    CRITICAL: { cls: 'risk-pill-red', label: 'Critical' },
+  };
+
+  const formatDateTime = (iso) => {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  };
+
+  const isEntered = (departureTime) => {
+    if (!formStartTime || !departureTime) return false;
+    const entered = new Date(formStartTime).getTime();
+    const dep = new Date(departureTime).getTime();
+    return Math.abs(entered - dep) < 60000;
+  };
+
+  const formatRemaining = (hours) => {
+    if (hours == null) return '—';
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+    return `${h}h ${m}min remaining`;
+  };
+
+  return (
+    <div className="optimizer-section">
+      <div className="optimizer-header">
+        <span>Departure Optimizer</span>
+        <span className="optimizer-sub">Compare departure times</span>
+      </div>
+      <div className="optimizer-table-wrapper">
+        <table className="optimizer-table">
+          <thead>
+            <tr>
+              <th>Departure</th>
+              <th>Time</th>
+              <th>Risk</th>
+              <th>Cycle Left</th>
+              <th>Restart</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {windows.map((w, i) => {
+              const cfg = config[w.violation_risk] || config.CRITICAL;
+              const entered = isEntered(w.departure_time);
+              return (
+                <tr key={i} className={`optimizer-row ${entered ? 'entered-time' : ''} ${w.recommended ? 'recommended' : ''}`}>
+                  <td className="opt-label">
+                    <strong>{w.departure_label}</strong>
+                    {w.recommended && <span className="rec-pill">Recommended</span>}
+                  </td>
+                  <td className="opt-time">{formatDateTime(w.departure_time)}</td>
+                  <td><span className={`risk-pill ${cfg.cls}`}>{cfg.label}</span></td>
+                  <td className="opt-cycle">{formatRemaining(w.cycle_remaining_on_arrival_hours)}</td>
+                  <td className={`opt-restart ${w.requires_restart ? 'needs-restart' : ''}`}>{w.requires_restart ? 'Yes' : 'No'}</td>
+                  <td>
+                    <button className="opt-use-btn" type="button" onClick={() => onUseTime(w.departure_time)}>Use this time</button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        <div className="optimizer-cards">
+          {windows.map((w, i) => {
+            const cfg = config[w.violation_risk] || config.CRITICAL;
+            const entered = isEntered(w.departure_time);
+            return (
+              <div key={i} className={`optimizer-card ${entered ? 'entered-time' : ''} ${w.recommended ? 'recommended' : ''}`}>
+                <div className="opt-card-header">
+                  <strong>{w.departure_label}</strong>
+                  {w.recommended && <span className="rec-pill">Recommended</span>}
+                </div>
+                <div className="opt-card-body">
+                  <div className="opt-card-row"><span>Time</span><span>{formatDateTime(w.departure_time)}</span></div>
+                  <div className="opt-card-row"><span>Risk</span><span className={`risk-pill ${cfg.cls}`}>{cfg.label}</span></div>
+                  <div className="opt-card-row"><span>Cycle Left</span><span>{formatRemaining(w.cycle_remaining_on_arrival_hours)}</span></div>
+                  <div className="opt-card-row"><span>Restart</span><span className={w.requires_restart ? 'needs-restart' : ''}>{w.requires_restart ? 'Yes' : 'No'}</span></div>
+                </div>
+                <button className="opt-use-btn" type="button" onClick={() => onUseTime(w.departure_time)}>Use this time</button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 }
 
