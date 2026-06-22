@@ -9,7 +9,7 @@ function DriverConsole({ tripPlan, formData }) {
   const rules = tripPlan?.ruleset_config || { cycle: 70, drive: 11, window: 14 };
   const cycleTone = cycleRemainingTone(tripPlan?.summary?.cycle_remaining ?? (rules.cycle - formData.cycle_hours_used));
   const driveRemain = status === 'Driving' ? Math.max(0, (tripPlan?.summary?.drive_remaining ?? rules.drive) - 0.1).toFixed(1) : (tripPlan?.summary?.drive_remaining ?? rules.drive);
-  const dutyRemain = ['Off Duty', 'Sleeper Berth'].includes(status) ? (tripPlan?.summary?.duty_window_remaining ?? rules.window) : Math.max(0, (tripPlan?.summary?.duty_window_remaining ?? rules.window) - 0.1).toFixed(1);
+  const dutyRemain = ['Off Duty', 'Sleeper Berth', 'Personal Conveyance'].includes(status) ? (tripPlan?.summary?.duty_window_remaining ?? rules.window) : Math.max(0, (tripPlan?.summary?.duty_window_remaining ?? rules.window) - 0.1).toFixed(1);
 
   const changeStatus = (nextStatus) => {
     const next = [{ status: nextStatus, at: new Date().toISOString() }, ...statusChanges].slice(0, 3);
@@ -38,8 +38,12 @@ function DriverConsole({ tripPlan, formData }) {
           <div className="hos-card-title">Duty Status</div>
           <div className={`status-indicator ${status.toLowerCase().replaceAll(' ', '-')}`}>{status}</div>
           <div className="duty-status-row">
-            {['Off Duty', 'Sleeper Berth', 'Driving', 'On Duty'].map((item) => (
-              <button key={item} className={status === item ? 'duty-btn active' : 'duty-btn'} type="button" onClick={() => changeStatus(item)}>{item}</button>
+            {['Off Duty', 'Sleeper Berth', 'Driving', 'On Duty', 'Personal Conveyance', 'Yard Move'].map((item) => (
+              <button key={item} className={status === item ? 'duty-btn active' : 'duty-btn'} type="button" onClick={() => changeStatus(item)}>
+                {item}
+                {item === 'Personal Conveyance' && <span className="duty-sub">Personal use — does not count against HOS</span>}
+                {item === 'Yard Move' && <span className="duty-sub">Yard movement — counts as On Duty, not Driving</span>}
+              </button>
             ))}
           </div>
           <div className="status-log">{statusChanges.map((entry) => <span key={`${entry.status}-${entry.at}`}>Status changed to {entry.status} at {formatDateTime(entry.at)}</span>)}</div>

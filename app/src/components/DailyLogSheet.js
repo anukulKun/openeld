@@ -78,7 +78,7 @@ function DailyLogSVG({ log }) {
   const GRAPH_TOP = 218;
   const ROWS = ['1. Off Duty', '2. Sleeper Berth', '3. Driving', '4. On Duty (Not Driving)'];
   const STATUS_KEYS = ['off_duty', 'sleeper', 'driving', 'on_duty'];
-  const statusToRow = { off_duty: 0, sleeper: 1, driving: 2, on_duty: 3 };
+  const statusToRow = { off_duty: 0, sleeper: 1, driving: 2, on_duty: 3, pc: 0, ym: 3 };
   const hx = (h) => GRAPH_LEFT + (Math.max(0, Math.min(24, Number(h) || 0)) / 24) * GRAPH_W;
   const rowY = (r) => GRAPH_TOP + r * ROW_H;
   const rowMidY = (r) => rowY(r) + ROW_H / 2;
@@ -208,7 +208,7 @@ function DailyLogSVG({ log }) {
   );
 }
 
-function buildLog(dayData, tripInfo, tripPlan) {
+export function buildLog(dayData, tripInfo, tripPlan) {
   const events = dayData.events?.length ? dayData.events : eventsFromSchedule(dayData);
   return {
     ...dayData,
@@ -235,7 +235,7 @@ function buildLog(dayData, tripInfo, tripPlan) {
 }
 
 function eventsFromSchedule(dayData) {
-  const map = { OFF_DUTY: 'off_duty', SLEEPER_BERTH: 'sleeper', DRIVING: 'driving', ON_DUTY_NOT_DRIVING: 'on_duty' };
+  const map = { OFF_DUTY: 'off_duty', SLEEPER_BERTH: 'sleeper', DRIVING: 'driving', ON_DUTY_NOT_DRIVING: 'on_duty', PC: 'pc', YM: 'ym' };
   return (dayData.schedule || []).map((segment) => ({
     status: map[segment.status] || 'off_duty',
     start: isoForHour(dayData.date, segment.start_hour),
@@ -256,8 +256,8 @@ function remarksFromEvents(events) {
 }
 
 function totalsFromSchedule(schedule = []) {
-  const totals = { off_duty: 0, sleeper: 0, driving: 0, on_duty: 0 };
-  const map = { OFF_DUTY: 'off_duty', SLEEPER_BERTH: 'sleeper', DRIVING: 'driving', ON_DUTY_NOT_DRIVING: 'on_duty' };
+  const totals = { off_duty: 0, sleeper: 0, driving: 0, on_duty: 0, pc: 0, ym: 0 };
+  const map = { OFF_DUTY: 'off_duty', SLEEPER_BERTH: 'sleeper', DRIVING: 'driving', ON_DUTY_NOT_DRIVING: 'on_duty', PC: 'pc', YM: 'ym' };
   schedule.forEach((segment) => {
     const key = map[segment.status];
     if (key) totals[key] += Number(segment.end_hour) - Number(segment.start_hour);
@@ -298,6 +298,8 @@ function statusLabel(status) {
     SLEEPER_BERTH: 'Sleeper berth',
     DRIVING: 'Driving',
     ON_DUTY_NOT_DRIVING: 'On duty not driving',
+    PC: 'Personal Conveyance',
+    YM: 'Yard Move',
   }[status] || status;
 }
 

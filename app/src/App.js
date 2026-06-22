@@ -3,9 +3,12 @@ import './App.css';
 import Sidebar from './components/Sidebar';
 import MainPages from './components/HosDashboard';
 import BottomNav from './components/BottomNav';
-import AuthModal from './components/AuthModal';
-import { fetchSupabaseTrips, planTrip, saveTripToSupabase } from './utils/api';
-import { supabase } from './lib/supabase';
+import SignInGate from './components/SignInGate';
+import ProfileMenu from './components/ProfileMenu';
+import { useAuth } from './context/AuthContext';
+import { planTrip } from './utils/api';
+import { getDriverProfile, saveTripRecord, getTripRecords, optimizeTrip } from './api/client';
+import { isFirebaseConfigured } from './firebase';
 
 const DEFAULT_START_TIME = '2026-05-08T18:11';
 const LOADING_MESSAGES = [
@@ -18,9 +21,10 @@ const HISTORY_LIMIT = 12;
 
 function App() {
   migrateLegacyStorage();
+  const { currentUser, idToken } = useAuth();
   const [currentPage, setCurrentPage] = useState('planner');
   const [theme, setTheme] = useState(() => localStorage.getItem('openeld-theme') || 'dark');
-  const logoSrc = theme === 'dark' ? '/logo-dark.png' : '/logo-light.png';
+  const logoSrc = '/logo.png';
   const [plannerTab, setPlannerTab] = useState('overview');
   const [formData, setFormData] = useState({
     driver_name: 'John Doe',
@@ -35,11 +39,36 @@ function App() {
   const [history, setHistory] = useState(() => readStorage('openeld-history', []).map(summarizeTrip));
   const [selectedHistoryId, setSelectedHistoryId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [optimizerData, setOptimizerData] = useState(null);
+  const [optimizerLoading, setOptimizerLoading] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
-  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    if (currentUser && isFirebaseConfigured && idToken) {
+      localStorage.removeItem('openeld-history');
+      getTripRecords(idToken).then((records) => {
+        const trips = records.results || records || [];
+        if (trips.length) setHistory(trips.map(summarizeTripRecord));
+        else setHistory([]);
+      }).catch(() => setHistory([]));
+    }
+  }, [currentUser, idToken]);
+
+  useEffect(() => {
+    if (currentUser && idToken && isFirebaseConfigured) {
+      getDriverProfile(idToken).then((profile) => {
+        if (!profile) return;
+        setFormData((prev) => ({
+          ...prev,
+          driver_name: profile.name || prev.driver_name,
+          hos_rules: profile.ruleset || prev.hos_rules,
+          cycle_hours_used: profile.cycle_used_hours ?? prev.cycle_hours_used,
+        }));
+      }).catch(() => {});
+    }
+  }, [currentUser, idToken]);
 
   const activePlan = useMemo(() => {
     if (currentPage === 'history' && selectedHistoryId) {
@@ -54,28 +83,8 @@ function App() {
   }, [tripPlan]);
 
   useEffect(() => {
-    if (!user) writeStorage('openeld-history', history.slice(0, HISTORY_LIMIT).map(summarizeTrip));
-  }, [history, user]);
-
-  useEffect(() => {
-    if (!supabase) return undefined;
-    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user || null));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => setUser(session?.user || null));
-    return () => listener.subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
-    fetchSupabaseTrips(user, HISTORY_LIMIT)
-      .then((trips) => {
-        setHistory(trips);
-        if (trips[0]) {
-          setTripPlan(trips[0]);
-          setSelectedHistoryId(trips[0].trip_id);
-        }
-      })
-      .catch(() => setError('Signed in, but saved trips could not be loaded. Local trips are still available.'));
-  }, [user]);
+    if (!currentUser) writeStorage('openeld-history', history.slice(0, HISTORY_LIMIT).map(summarizeTrip));
+  }, [history, currentUser]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -90,31 +99,47 @@ function App() {
     }));
   };
 
-  const handlePlanTrip = async (event) => {
-    event.preventDefault();
+  const planWithFormData = async (data) => {
     setLoading(true);
+    setOptimizerLoading(true);
     setError('');
     setFieldErrors({});
     try {
-      const plan = await planTrip(formData);
+      const [plan, optimizeResp] = await Promise.all([
+        planTrip(data),
+        idToken && optimizeTrip(idToken, {
+          current_location: data.start_location,
+          pickup_location: data.pickup_location,
+          dropoff_location: data.end_location,
+          current_cycle_hours: data.cycle_hours_used,
+          driver_name: data.driver_name,
+          start_time: data.start_time,
+          hos_rules: data.hos_rules,
+        }).catch(() => null),
+      ]);
+      setOptimizerData(optimizeResp || null);
       const storedPlan = {
         ...plan,
-        form: { ...formData },
+        form: { ...data },
         created_at: new Date().toISOString(),
         status: plan.compliance_status === 'VIOLATION' ? 'ERR' : plan.warnings?.length ? 'WARN' : 'OK',
       };
       setTripPlan(storedPlan);
       setHistory((prev) => [storedPlan, ...prev.filter((trip) => trip.trip_id !== storedPlan.trip_id)].slice(0, HISTORY_LIMIT));
+      if (currentUser && idToken && isFirebaseConfigured) {
+        saveTripRecord(idToken, tripToRecord(plan, data)).then((saved) => {
+          if (saved && saved.id) {
+            storedPlan.trip_id = saved.id;
+            storedPlan.db_id = saved.id;
+          }
+        }).catch(() => {});
+      }
       setSelectedHistoryId(storedPlan.trip_id);
       setPlannerTab('overview');
       setCurrentPage('planner');
       setSidebarOpen(false);
-      if (user) {
-        saveTripToSupabase(storedPlan, user).catch(() => setError('Trip planned, but it could not be saved to your account.'));
-      }
     } catch (err) {
       const payload = err.response?.data;
-      // FIX 7.5: surface API validation inline next to the relevant input.
       if (payload?.field) {
         setFieldErrors({ [fieldNameForApi(payload.field)]: payload.message });
       } else if (payload?.fields) {
@@ -124,10 +149,26 @@ function App() {
       }
     } finally {
       setLoading(false);
+      setOptimizerLoading(false);
     }
   };
 
+  const handlePlanTrip = async (event) => {
+    event.preventDefault();
+    await planWithFormData(formData);
+  };
+
+  const handleUseOptimizerTime = async (startTime) => {
+    const updated = { ...formData, start_time: startTime };
+    setFormData(updated);
+    await planWithFormData(updated);
+  };
+
   const handleHistorySelect = (plan) => {
+    if (selectedHistoryId === plan.trip_id) {
+      setSelectedHistoryId(null);
+      return;
+    }
     setSelectedHistoryId(plan.trip_id);
     if (plan.route && plan.daily_logs) setTripPlan(plan);
     else setCurrentPage('history');
@@ -145,19 +186,15 @@ function App() {
     setSidebarOpen(true);
   };
 
-  const handleAuthClick = async () => {
-    if (user && supabase) {
-      await supabase.auth.signOut();
-      setUser(null);
-      setHistory(readStorage('openeld-history', []).map(summarizeTrip));
-      return;
-    }
-    setAuthOpen(true);
-  };
+  if (isFirebaseConfigured && !currentUser) {
+    return <SignInGate />;
+  }
+  if (!isFirebaseConfigured) {
+    console.warn('[OpenELD] Firebase not configured — sign-in gate is disabled, running unauthenticated.');
+  }
 
   return (
     <div className="app-frame" data-theme={theme}>
-      {/* FIX UI-2: restore all primary destinations with a clear active state and theme control. */}
       <header className="top-nav">
         <div className="nav-brand">
           <button className="hamburger" type="button" onClick={() => setSidebarOpen((open) => !open)} aria-label="Toggle sidebar">Menu</button>
@@ -176,7 +213,7 @@ function App() {
           ))}
         </nav>
         <div className="nav-actions">
-          <button className="auth-button" type="button" onClick={handleAuthClick}>{user ? user.email : 'Sign In'}</button>
+          <ProfileMenu user={currentUser} />
           <button className="theme-toggle" type="button" onClick={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}>
             {theme === 'dark' ? 'Light' : 'Dark'}
           </button>
@@ -215,19 +252,25 @@ function App() {
             selectedHistoryId={selectedHistoryId}
             onHistorySelect={handleHistorySelect}
             loading={loading}
+            optimizerData={optimizerData}
+            optimizerLoading={optimizerLoading}
             onUseDeparture={handleUseDeparture}
+            onUseOptimizerTime={handleUseOptimizerTime}
             onPlanNew={() => {
               handleClearActiveTrip();
               setSidebarOpen(true);
             }}
             onPageChange={setCurrentPage}
             logoSrc={logoSrc}
+            onDeleteTrip={(id) => {
+              setHistory((prev) => prev.filter((t) => t.trip_id !== id && t.db_id !== id));
+              setSelectedHistoryId((prev) => prev === id ? null : prev);
+            }}
           />
         </main>
       </div>
       <button className="mobile-sheet-button" type="button" onClick={() => setSidebarOpen(true)}>Plan Trip</button>
-      <BottomNav currentPage={currentPage} onPageChange={setCurrentPage} onAuthClick={handleAuthClick} user={user} />
-      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} onAuth={setUser} />
+      <BottomNav currentPage={currentPage} onPageChange={setCurrentPage} />
     </div>
   );
 }
@@ -296,8 +339,62 @@ function copyAndRemoveStorage(oldKey, newKey) {
     if (existing && !localStorage.getItem(newKey)) localStorage.setItem(newKey, existing);
     if (existing) localStorage.removeItem(oldKey);
   } catch {
-    // Storage migration should never block app startup.
   }
+}
+
+function tripToRecord(plan, form) {
+  const risk = plan.compliance_status === 'VIOLATION' ? 'HIGH' : plan.warnings?.length ? 'MEDIUM' : 'LOW';
+  const stops = (plan.route?.waypoints || plan.summary?.planned_stops || []).map((s) => ({
+    location: s.location || s.name || '',
+    type: s.type || 'stop',
+    duration_hours: s.duration_hours || s.duration || 0,
+    arrival: s.arrival || s.eta || '',
+  }));
+  return {
+    origin: plan.start_location || form.start_location,
+    pickup: plan.pickup_location || form.pickup_location || '',
+    destination: plan.dropoff_location || form.end_location,
+    start_time: plan.start_time || form.start_time,
+    ruleset: plan.hos_rules || form.hos_rules,
+    cycle_used_at_start: form.cycle_hours_used || plan.current_cycle_hours || 0,
+    total_miles: plan.total_distance_miles || 0,
+    estimated_drive_hours: plan.total_driving_hours || 0,
+    stops: stops,
+    daily_logs: plan.daily_logs || [],
+    violation_risk: risk,
+  };
+}
+
+function summarizeTripRecord(record) {
+  const risk = record.violation_risk || '';
+  return {
+    trip_id: record.id,
+    db_id: record.id,
+    trip_title: `${record.origin} \u2192 ${record.pickup || record.destination} \u2192 ${record.destination}`,
+    start_location: record.origin,
+    pickup_location: record.pickup,
+    dropoff_location: record.destination,
+    driver_name: '',
+    total_distance_miles: record.total_miles || 0,
+    total_driving_hours: record.estimated_drive_hours || 0,
+    status: risk === 'HIGH' ? 'ERR' : risk === 'MEDIUM' ? 'WARN' : 'OK',
+    compliance_status: risk === 'HIGH' ? 'VIOLATION' : risk === 'MEDIUM' ? 'WARNING' : 'COMPLIANT',
+    created_at: record.created_at,
+    start_time: record.start_time,
+    violation_risk: risk,
+    summary: {
+      eta: '',
+      planned_stops: record.stops || [],
+    },
+    form: {},
+    log_summaries: (record.daily_logs || []).map((log) => ({
+      day: log.day,
+      date: log.date,
+      hos_summary: log.hos_summary,
+      shift_drive_breakdown: log.shift_drive_breakdown,
+    })),
+    daily_logs: record.daily_logs || [],
+  };
 }
 
 function summarizeTrip(trip) {
@@ -313,6 +410,7 @@ function summarizeTrip(trip) {
     total_driving_hours: trip.total_driving_hours,
     status: trip.status,
     compliance_status: trip.compliance_status,
+    violation_risk: trip.violation_risk || '',
     created_at: trip.created_at,
     start_time: trip.start_time,
     summary: {

@@ -45,17 +45,19 @@
   --shadow-lg: 0 12px 32px rgba(0,0,0,0.5);
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body, #root { height: 100%; overflow: hidden; }
 body {
   margin: 0;
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
+input, textarea, select { font-size: 16px; }
 button, input, select { font: inherit; }
 button { color: inherit; }
-.app-frame { height: 100%; background: var(--bg-primary); }
+.app-frame { height: 100%; background: var(--bg-primary); overscroll-behavior: none; }
 
 /* FIX UI-2: restored full top nav with clear active state. */
 .top-nav {
@@ -124,7 +126,7 @@ button { color: inherit; }
 }
 .theme-toggle:hover, .hamburger:hover, .auth-button:hover { color: var(--text-primary); border-color: var(--border-strong); }
 .hamburger { display: none; }
-.nav-actions { display: flex; align-items: center; gap: 8px; }
+.nav-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .auth-button { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* FIX UI-3: fixed app shell and sidebar scroll context. */
@@ -170,13 +172,15 @@ button { color: inherit; }
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 20px 16px;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
 }
 .sidebar-content::-webkit-scrollbar,
 .recent-list::-webkit-scrollbar,
 .limits-list::-webkit-scrollbar { display: none; }
-.workspace { flex: 1; min-width: 0; height: 100%; overflow-y: auto; overflow-x: hidden; background: var(--bg-primary); }
+.workspace { flex: 1; min-width: 0; height: 100%; overflow-y: auto; overflow-x: hidden; background: var(--bg-primary); -webkit-overflow-scrolling: touch; }
 .sidebar-overlay, .bottom-nav, .mobile-sheet-button { display: none; }
 

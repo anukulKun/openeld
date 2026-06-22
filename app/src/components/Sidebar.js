@@ -8,7 +8,7 @@ const RULESET_LIMITS = {
   'alaska-80-hour/8-day': { drive: 15, window: 20, cycle: '80 hrs / 8 days' },
 };
 
-function Sidebar({ formData, loading, tripPlan, history, onFormChange, onSubmit, onPageChange, onPlannerTabChange, onHistorySelect, onClearActiveTrip, fieldErrors }) {
+function Sidebar({ formData, loading, tripPlan, onFormChange, onSubmit, onPageChange, onPlannerTabChange, onClearActiveTrip, fieldErrors }) {
   const [tab, setTab] = useState('new');
   const limits = RULESET_LIMITS[formData.hos_rules] || RULESET_LIMITS['70-hour/8-day'];
 
@@ -17,7 +17,6 @@ function Sidebar({ formData, loading, tripPlan, history, onFormChange, onSubmit,
       {/* FIX UI-3: keep tabs fixed while sidebar content scrolls independently with hidden scrollbars. */}
       <div className="sidebar-tabs">
         <button className={tab === 'new' ? 'sidebar-tab active' : 'sidebar-tab'} type="button" onClick={() => setTab('new')}>New Trip</button>
-        <button className={tab === 'recent' ? 'sidebar-tab active' : 'sidebar-tab'} type="button" onClick={() => setTab('recent')}>Recent</button>
         <button className={tab === 'limits' ? 'sidebar-tab active' : 'sidebar-tab'} type="button" onClick={() => setTab('limits')}>HOS Limits</button>
       </div>
 
@@ -37,16 +36,6 @@ function Sidebar({ formData, loading, tripPlan, history, onFormChange, onSubmit,
         )}
 
         {tab === 'new' && <PlannerView formData={formData} loading={loading} onFormChange={onFormChange} onSubmit={onSubmit} fieldErrors={fieldErrors} />}
-        {tab === 'recent' && (
-          <div className="recent-list">
-            {history.length === 0 ? <p>No saved trips yet.</p> : history.map((trip) => (
-              <button key={trip.trip_id} type="button" onClick={() => onHistorySelect(trip)}>
-                <strong>{tripTitle(trip)}</strong>
-                <span>{trip.driver_name} | {Math.round(trip.total_distance_miles)} mi</span>
-              </button>
-            ))}
-          </div>
-        )}
         {tab === 'limits' && (
           <div className="limits-list">
             {/* FIX RULESET-2: limits panel follows the selected FMCSA/Alaska ruleset. */}
