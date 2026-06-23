@@ -21,7 +21,7 @@ function HistoryPage({ history, selectedHistoryId, onHistorySelect, onDeleteTrip
       setError('Failed to delete trip');
       setDeletingIds((s) => { const n = new Set(s); n.delete(trip.trip_id); return n; });
     }
-  }, [idToken, history, onHistorySelect, onDeleteTrip, deletingIds]);
+  }, [idToken, onDeleteTrip, deletingIds]);
 
   const selected = selectedHistoryId ? history.find((trip) => trip.trip_id === selectedHistoryId) : null;
 
