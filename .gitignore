@@ -22,6 +22,7 @@ dist/
 .env
 .env.local
 *.env.local
+.env.upload
 backend/.env
 app/.env
 
