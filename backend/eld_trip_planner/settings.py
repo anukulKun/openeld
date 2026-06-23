@@ -31,12 +31,13 @@ if RENDER_EXTERNAL_HOSTNAME:
     render_origin = f'https://{RENDER_EXTERNAL_HOSTNAME}'
     if render_origin not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(render_origin)
+FRONTEND_URL = os.environ.get('FRONTEND_URL')
+if FRONTEND_URL and FRONTEND_URL not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
 if FLY_APP_NAME:
     fly_origin = f'https://{FLY_APP_NAME}.fly.dev'
     if fly_origin not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(fly_origin)
-    if f'https://platform.openeld.vercel.app' not in CSRF_TRUSTED_ORIGINS:
-        CSRF_TRUSTED_ORIGINS.append('https://platform.openeld.vercel.app')
 
 
 # Application definition

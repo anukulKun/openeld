@@ -1,4 +1,7 @@
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api';
+const BASE_URL = process.env.REACT_APP_API_URL;
+if (!BASE_URL) {
+  throw new Error('REACT_APP_API_URL is not set. Add it to your .env file.');
+}
 
 export async function api(method, path, body, token) {
   const headers = { 'Content-Type': 'application/json' };

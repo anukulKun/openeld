@@ -1,11 +1,10 @@
 import axios from 'axios';
 import { auth } from '../firebase';
 
-const API_BASE_URL =
-  process.env.REACT_APP_API_URL ||
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://127.0.0.1:8000/api'
-    : 'https://openeld.onrender.com/api');
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+if (!API_BASE_URL) {
+  throw new Error('REACT_APP_API_URL is not set. Add it to your .env file.');
+}
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
