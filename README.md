@@ -66,12 +66,22 @@ Live GPS tracker shows heading, speed, and distance to next stop
 
 ## Quick start
 
+> **This is a self-hostable template — bring your own everything.** Before
+> starting, read [SETUP.md](SETUP.md): it walks through the accounts you need
+> (a Firebase project if you want sign-in — optional), every value in the
+> `.env.example` files, local run, two deployment paths, and how to rebrand
+> your instance (app name, logo, carrier details live in
+> `app/src/config.js` and `backend/eld_trip_planner/config.py`). Below is the
+> 30-second version.
+
 ### Docker (recommended)
 
 ```bash
-git clone https://github.com/openeld-org/openeld.git
+git clone <your-fork-url> openeld   # or clone the upstream OpenELD repo
 cd openeld
 cp backend/.env.example backend/.env
+cp app/.env.example      app/.env
+# edit both .env files (even all-empty works — auth is then disabled)
 docker compose up --build
 ```
 
@@ -127,7 +137,7 @@ npm start
 | Folder | What it does |
 |---|---|
 | [`app/`](app) | Trip planner UI — React 18, Leaflet, Axios |
-| [`backend/`](backend) | API server — Django 4.1, DRF, HOS engine, OSRM routing |
+| [`backend/`](backend) | API server — Django 4.2 (LTS), DRF, HOS engine, OSRM routing |
 | [`.github/`](.github) | CI workflows, issue templates |
 
 ---
@@ -137,18 +147,19 @@ npm start
 | Layer | Technology |
 |---|---|
 | Product UI | React 18, Leaflet, Axios |
-| Backend | Django 4.1, Django REST Framework |
+| Backend | Django 4.2 (LTS), Django REST Framework |
 | HOS Engine | Custom Python — 70/8, 60/7, Alaska rulesets |
-| Routing | OSRM + haversine fallback |
-| Geocoding | OpenStreetMap Nominatim |
+| Routing | OSRM + haversine fallback (self-hostable) |
+| Geocoding | OpenStreetMap Nominatim (self-hostable) |
 | Database | SQLite (dev) · Postgres (prod) |
-| Deployment | Docker · Render · Vercel |
+| Deployment | Docker · Render · Vercel · any VPS |
 
 ---
 
 ## Contributing
 
-PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). It also covers running
+**your own fork** if you don't want to contribute upstream.
 
 Bug fixes and small improvements are the best way to start. For larger features, open an issue first so we can align on the roadmap. Before submitting a PR:
 
