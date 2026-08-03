@@ -5,12 +5,12 @@ import {
 } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyDSW_qDyoKKtXL-yKODkckzwDe-oGKe2ZM',
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || 'openeld.firebaseapp.com',
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || 'openeld',
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || 'openeld.firebasestorage.app',
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || '208576408630',
-  appId: process.env.REACT_APP_FIREBASE_APP_ID || '1:208576408630:web:2c7ba269aca07533f2fc97',
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || '',
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || '',
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || '',
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || '',
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: process.env.REACT_APP_FIREBASE_APP_ID || '',
 };
 
 export const isFirebaseConfigured = Boolean(firebaseConfig.apiKey && firebaseConfig.authDomain);
