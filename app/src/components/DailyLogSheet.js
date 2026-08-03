@@ -1,6 +1,7 @@
 import React from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { DEFAULT_CARRIER, STORAGE_PREFIX } from '../config';
 
 function DailyLogSheet({ dayData, tripInfo, tripPlan }) {
   if (!dayData) return null;
@@ -65,7 +66,7 @@ export async function downloadLogPdf(date) {
   const x = (pageWidth - width) / 2;
   const y = (pageHeight - height) / 2;
   pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, width, height);
-  pdf.save(`openeld-log-${date || 'sheet'}.pdf`);
+  pdf.save(`${STORAGE_PREFIX}-log-${date || 'sheet'}.pdf`);
 }
 
 function DailyLogSVG({ log }) {
@@ -115,7 +116,7 @@ function DailyLogSVG({ log }) {
       <text x="225" y="103" fontSize="8" fill="#777" textAnchor="middle">Total Mileage Today</text>
       <text x="310" y="83" fontSize="9" fill="#666">Name of Carrier or Carriers</text>
       <line x1="310" y1="92" x2="750" y2="92" stroke="#000" strokeWidth="0.8" />
-      <text x="312" y="90" fontSize="11" fill="#000">{log.carrier || 'OpenELD'}</text>
+      <text x="312" y="90" fontSize="11" fill="#000">{log.carrier || DEFAULT_CARRIER}</text>
 
       <text x="10" y="120" fontSize="9" fill="#666">Truck/Tractor and Trailer Numbers or License Plate(s)/State</text>
       <line x1="10" y1="130" x2="300" y2="130" stroke="#000" strokeWidth="0.8" />
@@ -214,7 +215,7 @@ export function buildLog(dayData, tripInfo, tripPlan) {
     ...dayData,
     from: dayData.from || dayData.start_location,
     to: dayData.to || dayData.end_location,
-    carrier: dayData.carrier || 'OpenELD',
+    carrier: dayData.carrier || DEFAULT_CARRIER,
     main_office: dayData.main_office || dayData.main_office_address || '123 Dispatch Ave, Chicago, IL 60601',
     home_terminal: dayData.home_terminal || 'Home Terminal, New York, NY 10001',
     tractor: dayData.tractor || 'TRK-1042',

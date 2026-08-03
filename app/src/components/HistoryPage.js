@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { deleteTripRecord } from '../api/client';
 import { formatHours } from '../utils/tripPresentation';
+import { DEFAULT_CARRIER, STORAGE_PREFIX } from '../config';
 
 function HistoryPage({ history, selectedHistoryId, onHistorySelect, onDeleteTrip }) {
   const { idToken } = useAuth();
@@ -101,7 +102,7 @@ function downloadAllJson(history) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `openeld-trips-${new Date().toISOString().slice(0, 10)}.json`;
+  link.download = `${STORAGE_PREFIX}-trips-${new Date().toISOString().slice(0, 10)}.json`;
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -219,7 +220,7 @@ function renderLogSvg(log) {
     `<text x="225" y="103" font-size="8" fill="#777" text-anchor="middle">Total Mileage Today</text>` +
     `<text x="310" y="83" font-size="9" fill="#666">Name of Carrier or Carriers</text>` +
     `<line x1="310" y1="92" x2="750" y2="92" stroke="#000" stroke-width="0.8"/>` +
-    `<text x="312" y="90" font-size="11" fill="#000">${esc(log.carrier || 'OpenELD')}</text>` +
+    `<text x="312" y="90" font-size="11" fill="#000">${esc(log.carrier || DEFAULT_CARRIER)}</text>` +
     `<text x="10" y="120" font-size="9" fill="#666">Truck/Tractor and Trailer Numbers or License Plate(s)/State</text>` +
     `<line x1="10" y1="130" x2="300" y2="130" stroke="#000" stroke-width="0.8"/>` +
     `<text x="12" y="128" font-size="11" fill="#000">${esc(log.tractor || 'TRK-1042')} / ${esc(log.trailer || 'TRL-2208')}</text>` +
@@ -299,7 +300,7 @@ function downloadLogSvg(tripPlan, log) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `openeld-log-${logData.date}.svg`;
+  link.download = `${STORAGE_PREFIX}-log-${logData.date}.svg`;
   link.click();
   URL.revokeObjectURL(url);
 }

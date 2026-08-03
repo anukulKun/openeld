@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { signInWithGoogle, signInWithEmail, signUpWithEmail } from '../firebase';
+import { APP_NAME, LOGO_PATH } from '../config';
 
 export default function SignInGate({ children }) {
   const [signingIn, setSigningIn] = useState(false);
@@ -14,7 +15,7 @@ export default function SignInGate({ children }) {
     try {
       await signInWithGoogle();
     } catch (err) {
-      console.error('[OpenELD] Google sign-in error:', err.code, err.message, err);
+      console.error(`[${APP_NAME}] Google sign-in error:`, err.code, err.message, err);
       const messages = {
         'auth/unauthorized-domain': 'This domain isn\u2019t authorized for sign-in yet. Contact the site owner.',
         'auth/network-request-failed': 'Network error. Check your connection and try again.',
@@ -44,7 +45,7 @@ export default function SignInGate({ children }) {
         await signInWithEmail(email, password);
       }
     } catch (err) {
-      console.error('[OpenELD] Email sign-in error:', err.code, err.message, err);
+      console.error(`[${APP_NAME}] Email sign-in error:`, err.code, err.message, err);
       const messages = {
         'auth/email-already-in-use': 'An account already exists with this email. Try signing in instead.',
         'auth/invalid-email': 'That email address looks invalid.',
@@ -65,13 +66,13 @@ export default function SignInGate({ children }) {
     <div className="signin-gate">
       <div className="signin-gate-card">
         <div className="signin-gate-logo">
-          <img src="/logo.png" alt="OpenELD" />
-          <span>OpenELD</span>
+          <img src={LOGO_PATH} alt={APP_NAME} />
+          <span>{APP_NAME}</span>
         </div>
 
         <h1>Sign in to plan your route.</h1>
         <p>
-          OpenELD keeps your trips, cycle hours, and log history tied to
+          {APP_NAME} keeps your trips, cycle hours, and log history tied to
           your account, so they're there whenever you come back.
         </p>
 

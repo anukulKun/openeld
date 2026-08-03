@@ -1,3 +1,5 @@
+import { STORAGE_PREFIX } from '../config';
+
 export function buildStopRows(tripPlan) {
   return (tripPlan.route?.waypoints || [])
     .filter((point) => ['fuel', 'rest'].includes(point.type))
@@ -122,7 +124,7 @@ export function cycleRemainingTone(hours) {
 
 export function readTripStorage(tripId, key, fallback) {
   try {
-    return JSON.parse(localStorage.getItem(`openeld-${tripId || 'new'}-${key}`)) || fallback;
+    return JSON.parse(localStorage.getItem(`${STORAGE_PREFIX}-${tripId || 'new'}-${key}`)) || fallback;
   } catch {
     return fallback;
   }
@@ -152,7 +154,7 @@ export function downloadJson(tripPlan) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `openeld-trip-${tripPlan.trip_id || 'plan'}.json`;
+  link.download = `${STORAGE_PREFIX}-trip-${tripPlan.trip_id || 'plan'}.json`;
   link.click();
   URL.revokeObjectURL(url);
 }

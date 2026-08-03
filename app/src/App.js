@@ -9,7 +9,9 @@ import { useAuth } from './context/AuthContext';
 import { planTrip } from './utils/api';
 import { getDriverProfile, saveTripRecord, getTripRecords, optimizeTrip } from './api/client';
 import { isFirebaseConfigured } from './firebase';
+import { APP_NAME, LOGO_PATH, STORAGE_PREFIX } from './config';
 
+const STORAGE_KEY = (name) => `${STORAGE_PREFIX}-${name}`;
 const DEFAULT_START_TIME = '2026-05-08T18:11';
 const LOADING_MESSAGES = [
   'Calculating route with OSRM...',
@@ -23,8 +25,8 @@ function App() {
   migrateLegacyStorage();
   const { currentUser, idToken } = useAuth();
   const [currentPage, setCurrentPage] = useState('planner');
-  const [theme, setTheme] = useState(() => localStorage.getItem('openeld-theme') || 'dark');
-  const logoSrc = '/logo.png';
+  const [theme, setTheme] = useState(() => localStorage.getItem(STORAGE_KEY('theme')) || 'dark');
+  const logoSrc = LOGO_PATH;
   const [plannerTab, setPlannerTab] = useState('overview');
   const [formData, setFormData] = useState({
     driver_name: 'John Doe',
@@ -35,8 +37,8 @@ function App() {
     start_time: DEFAULT_START_TIME,
     cycle_hours_used: 14,
   });
-  const [tripPlan, setTripPlan] = useState(() => readStorage('openeld-last-plan', null));
-  const [history, setHistory] = useState(() => readStorage('openeld-history', []).map(summarizeTrip));
+  const [tripPlan, setTripPlan] = useState(() => readStorage(STORAGE_KEY('last-plan'), null));
+  const [history, setHistory] = useState(() => readStorage(STORAGE_KEY('history'), []).map(summarizeTrip));
   const [selectedHistoryId, setSelectedHistoryId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [optimizerData, setOptimizerData] = useState(null);
@@ -47,7 +49,7 @@ function App() {
 
   useEffect(() => {
     if (currentUser && isFirebaseConfigured && idToken) {
-      localStorage.removeItem('openeld-history');
+      localStorage.removeItem(STORAGE_KEY('history'));
       getTripRecords(idToken).then((records) => {
         const trips = records.results || records || [];
         if (trips.length) setHistory(trips.map(summarizeTripRecord));
@@ -78,17 +80,17 @@ function App() {
   }, [currentPage, history, selectedHistoryId, tripPlan]);
 
   useEffect(() => {
-    if (tripPlan) writeStorage('openeld-last-plan', tripPlan);
-    else localStorage.removeItem('openeld-last-plan');
+    if (tripPlan) writeStorage(STORAGE_KEY('last-plan'), tripPlan);
+    else localStorage.removeItem(STORAGE_KEY('last-plan'));
   }, [tripPlan]);
 
   useEffect(() => {
-    if (!currentUser) writeStorage('openeld-history', history.slice(0, HISTORY_LIMIT).map(summarizeTrip));
+    if (!currentUser) writeStorage(STORAGE_KEY('history'), history.slice(0, HISTORY_LIMIT).map(summarizeTrip));
   }, [history, currentUser]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('openeld-theme', theme);
+    localStorage.setItem(STORAGE_KEY('theme'), theme);
   }, [theme]);
 
   const handleFormChange = (event) => {
@@ -178,7 +180,7 @@ function App() {
     setTripPlan(null);
     setSelectedHistoryId(null);
     setPlannerTab('overview');
-    localStorage.removeItem('openeld-last-plan');
+    localStorage.removeItem(STORAGE_KEY('last-plan'));
   };
 
   const handleUseDeparture = (startTime) => {
@@ -190,7 +192,7 @@ function App() {
     return <SignInGate />;
   }
   if (!isFirebaseConfigured) {
-    console.warn('[OpenELD] Firebase not configured — sign-in gate is disabled, running unauthenticated.');
+    console.warn(`[${APP_NAME}] Firebase not configured — sign-in gate is disabled, running unauthenticated.`);
   }
 
   return (
@@ -198,7 +200,7 @@ function App() {
       <header className="top-nav">
         <div className="nav-brand">
           <button className="hamburger" type="button" onClick={() => setSidebarOpen((open) => !open)} aria-label="Toggle sidebar">Menu</button>
-          <img src={logoSrc} alt="OpenELD" className="nav-logo-mark" />
+          <img src={logoSrc} alt={APP_NAME} className="nav-logo-mark" />
         </div>
         <nav className="nav-links" aria-label="Primary views">
           {[
@@ -329,8 +331,8 @@ function writeStorage(key, value) {
 function migrateLegacyStorage() {
   if (migrateLegacyStorage.done) return;
   migrateLegacyStorage.done = true;
-  copyAndRemoveStorage('routeguard-last-plan', 'openeld-last-plan');
-  copyAndRemoveStorage('routeguard-history', 'openeld-history');
+  copyAndRemoveStorage('routeguard-last-plan', STORAGE_KEY('last-plan'));
+  copyAndRemoveStorage('routeguard-history', STORAGE_KEY('history'));
 }
 
 function copyAndRemoveStorage(oldKey, newKey) {
