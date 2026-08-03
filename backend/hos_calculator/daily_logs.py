@@ -1,5 +1,7 @@
 from datetime import date, datetime, time, timedelta
 
+from django.conf import settings
+
 from .rules import nearest_city
 
 
@@ -56,13 +58,13 @@ class DailyLogBuilderMixin:
             "date": day,
             "timezone": "UTC",
             "co_driver": "",
-            "carrier": "RouteGuard ELD",
-            "main_office": "123 Dispatch Ave, Chicago, IL 60601",
-            "main_office_address": "123 Dispatch Ave, Chicago, IL 60601",
-            "home_terminal": "Home Terminal, New York, NY 10001",
-            "tractor": "TRK-1042",
-            "trailer": "TRL-2208",
-            "shipping_documents": "BOL-2026-001",
+            "carrier": getattr(settings, "DEFAULT_CARRIER", "OpenELD"),
+            "main_office": getattr(settings, "DEFAULT_MAIN_OFFICE", "123 Dispatch Ave, Chicago, IL 60601"),
+            "main_office_address": getattr(settings, "DEFAULT_MAIN_OFFICE", "123 Dispatch Ave, Chicago, IL 60601"),
+            "home_terminal": getattr(settings, "DEFAULT_HOME_TERMINAL", "Home Terminal, New York, NY 10001"),
+            "tractor": getattr(settings, "DEFAULT_TRACTOR", "TRK-1042"),
+            "trailer": getattr(settings, "DEFAULT_TRAILER", "TRL-2208"),
+            "shipping_documents": getattr(settings, "DEFAULT_SHIPPING_DOCUMENTS", "BOL-2026-001"),
             "from": self._first_location(schedule),
             "to": self._last_location(schedule),
             "start_location": self._first_location(schedule),
