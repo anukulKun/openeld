@@ -20,3 +20,9 @@ yarn-error.log*
 .env
 .env.*
 !.env.example
+backend/.env
+backend/firebase-service-account.json
+backend/*.json
+backend/db.sqlite3
+*.pem
+*.key
