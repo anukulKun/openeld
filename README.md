@@ -16,7 +16,7 @@ No hardware dongles. No subscriptions. No $40/truck/month SaaS contracts.
 
 <p align="center">
   <a href="https://github.com/openeld-org/openeld/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-000000.svg" /></a>
-  <a href="https://github.com/openeld-org/openeld/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/openeld-org/openeld/actions/workflows/ci.yml/badge.svg" /></a>
+  <a href="https://github.com/openeld-org/openeld/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/openeld-org/openeld/ci.yml?branch=main" /></a>
   <a href="https://discord.gg/YOUR_INVITE"><img alt="Discord" src="https://img.shields.io/badge/Discord-Join%20the%20community-5865F2?logo=discord&logoColor=white" /></a>
   <a href="https://openeld.vercel.app"><img alt="Live app" src="https://img.shields.io/badge/Live-app.openeld.xyz-000000" /></a>
 </p>
