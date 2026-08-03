@@ -149,6 +149,21 @@ from eld_trip_planner.cors import CORS_ALLOWED_ORIGINS, CORS_ALLOW_CREDENTIALS
 CORS_ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS
 CORS_ALLOW_CREDENTIALS = CORS_ALLOW_CREDENTIALS
 
+# Branding for this instance — edit eld_trip_planner/config.py to rebrand
+from eld_trip_planner.config import (
+    APP_NAME,
+    DEFAULT_CARRIER,
+    DEFAULT_HOME_TERMINAL,
+    DEFAULT_MAIN_OFFICE,
+    DEFAULT_SHIPPING_DOCUMENTS,
+    DEFAULT_TRACTOR,
+    DEFAULT_TRAILER,
+)
+
+# Routing / geocoding endpoints — self-host your own OSRM/Nominatim if you want privacy
+OSRM_BASE_URL = config('OSRM_BASE_URL', default='http://router.project-osrm.org/route/v1/driving')
+NOMINATIM_BASE_URL = config('NOMINATIM_BASE_URL', default='https://nominatim.openstreetmap.org')
+
 # Firebase Admin SDK — use env vars (not a JSON file path)
 FIREBASE_PROJECT_ID = config('FIREBASE_PROJECT_ID', default='')
 FIREBASE_PRIVATE_KEY = config('FIREBASE_PRIVATE_KEY', default='')

@@ -2,6 +2,7 @@ import math
 import time
 
 import requests
+from django.conf import settings
 
 from hos_calculator import nearest_city
 
@@ -24,8 +25,9 @@ def geocode(address):
     if key in FALLBACK_COORDS:
         return FALLBACK_COORDS[key]
     try:
+        nominatim_base = getattr(settings, "NOMINATIM_BASE_URL", "https://nominatim.openstreetmap.org")
         response = requests.get(
-            "https://nominatim.openstreetmap.org/search",
+            f"{nominatim_base}/search",
             params={"q": address, "format": "json", "limit": 1},
             headers={"User-Agent": "ELDTripPlanner/1.0"},
             timeout=8,

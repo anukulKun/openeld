@@ -6,8 +6,11 @@ Handles route geometry retrieval and optimization using OSRM
 import requests
 from typing import Dict, List, Tuple, Optional
 
+from django.conf import settings
 
-OSRM_BASE_URL = "http://router.project-osrm.org/route/v1/driving"
+OSRM_BASE_URL = getattr(
+    settings, "OSRM_BASE_URL", "http://router.project-osrm.org/route/v1/driving"
+)
 
 
 def get_osrm_route(coordinates: List[Tuple[float, float]]) -> Optional[Dict]:
