@@ -8,6 +8,8 @@ services:
       - path: backend/.env
         required: false
     environment:
+      # SQLite lives on a persistent volume so trips survive rebuilds.
+      # Set DATABASE_URL in backend/.env to use Postgres instead.
       SQLITE_DATABASE_PATH: "/app/backend/data/db.sqlite3"
     volumes:
       - openeld_data:/app/backend/data
@@ -18,6 +20,11 @@ services:
     command: sh -c "npm install --legacy-peer-deps && npm start"
     ports:
       - "3000:3000"
+    # Reads app/.env (copy from app/.env.example) for your Firebase values.
+    # `environment` below wins over anything with the same name here.
+    env_file:
+      - path: app/.env
+        required: false
     environment:
       REACT_APP_API_URL: "http://127.0.0.1:8000/api"
       HOST: "0.0.0.0"
